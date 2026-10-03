@@ -23,18 +23,28 @@
 </head>
 <body class="p-2 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center min-h-screen">
 
-  <!-- BANNER NOTIFICA AGGIORNAMENTO DISPONIBILE -->
-  <div id="pwa-update-banner" class="hidden fixed top-3 left-1/2 -translate-x-1/2 w-[92%] max-w-[480px] z-[250] p-3 rounded-xl border-2 border-amber-500 bg-[#2b221a] text-[#f7f2ea] shadow-2xl flex items-center justify-between gap-3 animate-bounce">
-    <div class="flex items-center gap-2.5">
-      <span class="text-2xl">🔔</span>
-      <div class="text-xs">
-        <strong class="block text-amber-300 font-dnd-heading text-sm">Nuova Versione Disponibile!</strong>
-        <span class="text-stone-300">Ci sono nuovi incantesimi o regole aggiornate.</span>
+  <!-- BANNER NOTIFICA AGGIORNAMENTO DISPONIBILE (OTTIMIZZATO SMARTPHONE, BOOX & TABLET) -->
+  <div id="pwa-update-banner" class="hidden fixed top-3 inset-x-2 sm:inset-x-4 max-w-[450px] mx-auto z-[300] p-3.5 sm:p-4 rounded-xl border-2 border-amber-500 bg-[#2b221a] text-[#f7f2ea] shadow-2xl transition-all" style="left: 10px; right: 10px; margin-left: auto; margin-right: auto; max-width: 450px;">
+    <div class="flex items-start justify-between gap-2.5 mb-2.5">
+      <div class="flex items-center gap-2.5">
+        <span class="text-2xl sm:text-3xl shrink-0">🔔</span>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <strong class="text-amber-300 font-dnd-heading text-sm sm:text-base">Nuova Versione Disponibile!</strong>
+            <span class="text-[9px] font-mono font-bold bg-amber-900/90 text-amber-200 px-1.5 py-0.5 rounded border border-amber-600">v3.5</span>
+          </div>
+          <span class="text-stone-300 text-xs block mt-0.5 leading-snug">Nuovi incantesimi, filtri avanzati e regole pronti all'uso.</span>
+        </div>
       </div>
+      <button id="pwa-update-dismiss" class="text-stone-400 hover:text-stone-200 text-base p-1 rounded hover:bg-stone-800 shrink-0 leading-none" title="Chiudi notifica">
+        ✕
+      </button>
     </div>
-    <button id="pwa-update-btn" class="action-btn text-xs font-bold bg-amber-600 hover:bg-amber-500 text-stone-950 py-1.5 px-3 shrink-0">
-      Aggiorna Ora ⚡
-    </button>
+    <div class="flex items-center gap-2 pt-1 border-t border-stone-700/60">
+      <button id="pwa-update-btn" class="action-btn flex-1 py-2 px-3 text-xs sm:text-sm font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 rounded-lg shadow-md flex items-center justify-center gap-1.5 min-h-[42px] cursor-pointer">
+        <span>⚡ Aggiorna Ora &amp; Ricarica</span>
+      </button>
+    </div>
   </div>
 
   <!-- ========================================================================= -->
@@ -45,8 +55,9 @@
     <div class="flex items-center gap-2.5">
       <img src="./icon.svg" alt="D&D 5e" style="width: 32px; height: 32px; min-width: 32px; object-fit: contain; border-radius: 6px;" />
       <div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <span class="font-dnd-heading text-base sm:text-lg text-amber-300">⚔️ D&amp;D 5e Zelota Companion</span>
+          <span id="app-version-badge" class="text-[9px] font-mono font-bold text-amber-200/90 bg-stone-900/70 px-1.5 py-0.5 rounded border border-amber-700/50" title="Versione Applicazione">v3.5</span>
           <span id="autosave-indicator" class="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-700/60">✓ Salvataggio Attivo</span>
         </div>
       </div>
@@ -54,6 +65,11 @@
     
     <!-- Azioni Rapide -->
     <div class="flex items-center flex-wrap gap-1.5">
+      <!-- Pulsante Aggiornamento Rapido Header (compare se c'è un update) -->
+      <button id="btn-header-update" class="hidden action-btn text-xs font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 border-2 border-amber-300 shadow-md py-1 px-2.5 flex items-center gap-1.5" title="Nuova versione pronta per l'installazione">
+        <span>⚡ Aggiorna App</span>
+        <span class="bg-stone-950 text-amber-300 text-[9px] px-1 py-0.2 rounded font-mono font-bold">v3.5</span>
+      </button>
       <button id="btn-toggle-eink" class="action-btn text-xs font-bold" title="Passa alla modalità ad alto contrasto per Onyx Boox">
         ⚪ Modo BOOX E-Ink
       </button>
@@ -1186,5 +1202,12 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
   <script src="./dnd-compendium-data.js"></script>
   <script src="./dnd-engine.js"></script>
   <script src="./app.js"></script>
+
+  <!-- FOOTER INFORMATIVO (VERSIONE VISIBILE NON INVASIVA) -->
+  <footer class="w-full max-w-[1050px] text-center text-[10px] text-stone-600 py-3 mt-4 no-print flex flex-col sm:flex-row items-center justify-between gap-1 border-t border-[#8f7d6e]/40 px-2">
+    <span>D&amp;D 5e Zelota Companion • 100% Offline PWA (Manuali: PHB + Xanathar + Tasha)</span>
+    <span class="font-mono font-bold text-stone-700 bg-[#ede4d3] px-2 py-0.5 rounded border border-[#ab9582]">Versione v3.5</span>
+  </footer>
+
 </body>
 </html>

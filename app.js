@@ -1843,61 +1843,143 @@ const App = {
   // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
+  // GESTIONE DEL SERVICE WORKER (PWA OFFLINE & AGGIORNAMENTI RESPONSIVE)
+  // ---------------------------------------------------------------------------
   initPWA() {
+    this.currentAppVersion = "v3.5";
+
+    const versionBadge = document.getElementById("app-version-badge");
+    if (versionBadge) versionBadge.textContent = this.currentAppVersion;
+
+    const btnHeaderUpdate = document.getElementById("btn-header-update");
+    if (btnHeaderUpdate) {
+      btnHeaderUpdate.addEventListener("click", () => this.applyUpdate());
+    }
+
+    const btnDismiss = document.getElementById("pwa-update-dismiss");
+    const banner = document.getElementById("pwa-update-banner");
+    if (btnDismiss && banner) {
+      btnDismiss.addEventListener("click", () => {
+        banner.classList.add("hidden");
+      });
+    }
+
+    const btnBannerUpdate = document.getElementById("pwa-update-btn");
+    if (btnBannerUpdate) {
+      btnBannerUpdate.addEventListener("click", () => this.applyUpdate());
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').then(reg => {
           console.log('PWA Service Worker attivo:', reg.scope);
 
-          // Un aggiornamento era già scaricato e in attesa (es. app chiusa prima di aggiornare)
-          if (reg.waiting && navigator.serviceWorker.controller) {
+          // 1. Se c'è già un worker in attesa
+          if (reg.waiting) {
             this.showUpdateBanner(reg.waiting);
           }
 
-          // Controlla se c'è un aggiornamento disponibile
+          // 2. Rileva nuovo worker durante l'installazione
           reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
             if (!newWorker) return;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Nuova versione scaricata! Mostra il banner di avviso
                 this.showUpdateBanner(newWorker);
               }
             });
           });
 
-          // L'app installata può restare aperta per giorni: ricontrolla quando torna in primo piano
+          // 3. Controlla periodicamente quando l'app torna visibile
           document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && navigator.onLine) {
               reg.update().catch(() => {});
             }
           });
-        }).catch(err => console.warn('PWA SW non registrato:', err));
 
-        // Ricarica SOLO se l'utente ha premuto "Aggiorna Ora"
+          // Controllo update attivo
+          if (navigator.onLine) {
+            reg.update().catch(() => {});
+          }
+        }).catch(err => console.warn('PWA SW registrazione:', err));
+
+        // Ricarica la pagina quando il nuovo SW prende il controllo
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (this._userRequestedUpdate && !this._refreshing) {
+          if (this._isUpdating && !this._refreshing) {
             this._refreshing = true;
-            window.location.reload();
+            const url = new URL(window.location.href);
+            url.searchParams.set('v', Date.now());
+            window.location.replace(url.toString());
           }
         });
       });
     }
   },
 
-  showUpdateBanner(worker) {
-    const banner = document.getElementById("pwa-update-banner");
-    const btn = document.getElementById("pwa-update-btn");
-    if (banner && btn) {
-      banner.classList.remove("hidden");
-      btn.onclick = async () => {
-        btn.textContent = "Aggiornamento in corso...";
-        this._userRequestedUpdate = true;
-        // Salva la scheda prima di ricaricare
-        try { if (typeof this.saveCurrent === "function") await this.saveCurrent(); } catch (e) {}
-        worker.postMessage({ type: 'SKIP_WAITING' });
-      };
+  showUpdateBanner(worker = null) {
+    this._waitingWorker = worker;
+
+    // Mostra pulsante rapido nell'header
+    const btnHeader = document.getElementById("btn-header-update");
+    if (btnHeader) {
+      btnHeader.classList.remove("hidden");
     }
+
+    // Mostra il banner popup centrato
+    const banner = document.getElementById("pwa-update-banner");
+    if (banner) {
+      banner.classList.remove("hidden");
+    }
+  },
+
+  async applyUpdate() {
+    if (this._isUpdating) return;
+    this._isUpdating = true;
+
+    const btnBanner = document.getElementById("pwa-update-btn");
+    const btnHeader = document.getElementById("btn-header-update");
+
+    if (btnBanner) {
+      btnBanner.innerHTML = "<span>⏳ Ricarica in corso...</span>";
+      btnBanner.disabled = true;
+    }
+    if (btnHeader) {
+      btnHeader.innerHTML = "<span>⏳ Ricarica...</span>";
+      btnHeader.disabled = true;
+    }
+
+    // 1. Salva subito il personaggio per non perdere dati
+    try {
+      this.saveCurrentCharacter();
+    } catch (e) {
+      console.warn("Autosave pre-update warning:", e);
+    }
+
+    // 2. Invia comando SKIP_WAITING a tutti i service worker possibili
+    try {
+      if (this._waitingWorker && this._waitingWorker.postMessage) {
+        this._waitingWorker.postMessage({ type: 'SKIP_WAITING', action: 'skipWaiting' });
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) {
+          if (r.waiting) r.waiting.postMessage({ type: 'SKIP_WAITING', action: 'skipWaiting' });
+          if (r.installing) r.installing.postMessage({ type: 'SKIP_WAITING', action: 'skipWaiting' });
+        }
+      }
+    } catch (e) {
+      console.warn("postMessage SKIP_WAITING error:", e);
+    }
+
+    // 3. Fallback di ricarica: se controllerchange non ricarica entro 500ms, ricarica forzatamente
+    setTimeout(() => {
+      if (!this._refreshing) {
+        this._refreshing = true;
+        const url = new URL(window.location.href);
+        url.searchParams.set('v', Date.now());
+        window.location.replace(url.toString());
+      }
+    }, 500);
   }
 };
 

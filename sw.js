@@ -2,7 +2,7 @@
 // SERVICE WORKER - CACHE-FIRST PER USO 100% OFFLINE (TABLET, BOOX, SMARTPHONE)
 // =============================================================================
 
-const CACHE_NAME = 'dnd-zelota-v3.4';
+const CACHE_NAME = 'dnd-zelota-v3.5';
 
 const ASSETS_TO_CACHE = [
   './',
@@ -83,7 +83,7 @@ self.addEventListener('fetch', (event) => {
 
 // Riceve comando di aggiornamento immediato dal banner dell'interfaccia
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data && (event.data.type === 'SKIP_WAITING' || event.data.action === 'skipWaiting')) {
     self.skipWaiting();
   }
 });
