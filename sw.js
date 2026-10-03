@@ -2,7 +2,7 @@
 // SERVICE WORKER - CACHE-FIRST PER USO 100% OFFLINE (TABLET, BOOX, SMARTPHONE)
 // =============================================================================
 
-const CACHE_NAME = 'dnd-zelota-v3.2';
+const CACHE_NAME = 'dnd-zelota-v3.4';
 
 const ASSETS_TO_CACHE = [
   './',
@@ -14,8 +14,16 @@ const ASSETS_TO_CACHE = [
   './dnd-engine.js',
   './icon.svg',
   './manifest.webmanifest',
-  './d_d_5e_interactive_character_sheet.html',
-  './kaelen__stigmata__vane_dnd5e.json'
+  './kaelen__stigmata__vane_dnd5e.json',
+  './fonts/fonts.css',
+  './fonts/cinzel-600.ttf',
+  './fonts/cinzel-700.ttf',
+  './fonts/cinzel-800.ttf',
+  './fonts/cinzel-900.ttf',
+  './fonts/medievalsharp-400.ttf',
+  './fonts/inter-400.ttf',
+  './fonts/inter-600.ttf',
+  './fonts/inter-700.ttf'
 ];
 
 self.addEventListener('install', (event) => {
@@ -23,7 +31,10 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Caching assets offline...');
       return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
+    })
+    // NOTA: niente skipWaiting() qui. Il nuovo SW resta "in attesa" finché
+    // l'utente non preme "Aggiorna Ora ⚡" (messaggio SKIP_WAITING più sotto).
+    // Così la pagina non si ricarica mai da sola mentre si sta scrivendo.
   );
 });
 

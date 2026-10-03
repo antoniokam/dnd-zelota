@@ -1,0 +1,89 @@
+{
+  "id": "barbarian",
+  "name": "Barbaro",
+  "hitDie": 12,
+  "primaryStat": "str",
+  "secondaryStat": "con",
+  "savingThrows": ["str", "con"],
+  "armorProficiencies": ["Armature Leggere", "Armature Medie", "Scudi"],
+  "weaponProficiencies": ["Armi Semplici", "Armi da Guerra"],
+  "toolProficiencies": [],
+  "skillChoices": { "count": 2, "from": ["animal_handling", "athletics", "intimidation", "nature", "perception", "survival"] },
+  "subclassLevel": 3,
+  "spellcaster": false,
+  "casterType": "none",
+  "cantripsKnown": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "spellsKnown": null,
+  "preparedFormula": null,
+  "resources": [
+    { "id": "rage", "name": "Ira", "uses": [2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,6,6,6,99], "recharge": "long" }
+  ],
+  "featuresByLevel": {
+    "1": [
+      { "name": "Ira", "desc": "Con un'azione bonus entri in ira per 1 minuto: vantaggio a prove e TS di Forza, bonus ai danni in mischia con armi basate su FOR (+2, +3 dal 9°, +4 dal 16°) e resistenza ai danni contundenti, perforanti e taglienti. Non puoi lanciare né concentrarti su incantesimi mentre sei in ira." },
+      { "name": "Difesa Senza Armatura", "desc": "Senza armatura la tua CA è 10 + mod DES + mod COS; puoi comunque usare uno scudo." }
+    ],
+    "2": [
+      { "name": "Attacco Irruento", "desc": "Al primo attacco del turno puoi scegliere di attaccare con vantaggio con le armi da mischia basate su FOR; fino al tuo prossimo turno anche gli attacchi contro di te hanno vantaggio." },
+      { "name": "Percezione del Pericolo", "desc": "Hai vantaggio ai TS di Destrezza contro effetti che puoi vedere, come trappole e incantesimi, se non sei accecato, assordato o incapacitato." }
+    ],
+    "3": [
+      { "name": "Cammino Primordiale", "desc": "Scegli il tuo Cammino (sottoclasse), che ti conferisce privilegi al 3°, 6°, 10° e 14° livello." },
+      { "name": "Conoscenza Primordiale (Opzionale, Tasha)", "desc": "Ottieni competenza in un'abilità aggiuntiva scelta dalla lista del barbaro." }
+    ],
+    "4": [
+      { "name": "Aumento dei Punteggi di Caratteristica", "desc": "Aumenta un punteggio di 2 o due punteggi di 1 (massimo 20), oppure scegli un talento." }
+    ],
+    "5": [
+      { "name": "Attacco Extra", "desc": "Quando compi l'azione di Attacco puoi attaccare due volte." },
+      { "name": "Movimento Veloce", "desc": "La tua velocità aumenta di 3 metri se non indossi un'armatura pesante." }
+    ],
+    "6": [
+      { "name": "Privilegio della sottoclasse", "desc": "Ottieni un privilegio del tuo Cammino Primordiale." }
+    ],
+    "7": [
+      { "name": "Istinto Ferino", "desc": "Hai vantaggio all'iniziativa; se sei sorpreso puoi agire normalmente nel primo turno entrando in ira prima di fare altro." },
+      { "name": "Balzo Istintivo (Opzionale, Tasha)", "desc": "Quando entri in ira puoi muoverti fino a metà della tua velocità come parte della stessa azione bonus." }
+    ],
+    "8": [
+      { "name": "Aumento dei Punteggi di Caratteristica", "desc": "Aumenta un punteggio di 2 o due punteggi di 1 (massimo 20), oppure scegli un talento." }
+    ],
+    "9": [
+      { "name": "Critico Brutale (1 dado)", "desc": "Quando metti a segno un colpo critico in mischia, tiri un dado aggiuntivo dell'arma per i danni." }
+    ],
+    "10": [
+      { "name": "Privilegio della sottoclasse", "desc": "Ottieni un privilegio del tuo Cammino Primordiale." },
+      { "name": "Conoscenza Primordiale (Opzionale, Tasha)", "desc": "Ottieni un'ulteriore competenza in un'abilità della lista del barbaro." }
+    ],
+    "11": [
+      { "name": "Ira Implacabile", "desc": "Se scendi a 0 PF mentre sei in ira e non muori, puoi superare un TS su COS (CD 10, +5 per ogni uso successivo fino a un riposo) per restare a 1 PF." }
+    ],
+    "12": [
+      { "name": "Aumento dei Punteggi di Caratteristica", "desc": "Aumenta un punteggio di 2 o due punteggi di 1 (massimo 20), oppure scegli un talento." }
+    ],
+    "13": [
+      { "name": "Critico Brutale (2 dadi)", "desc": "Il Critico Brutale ora aggiunge due dadi dell'arma." }
+    ],
+    "14": [
+      { "name": "Privilegio della sottoclasse", "desc": "Ottieni un privilegio del tuo Cammino Primordiale." }
+    ],
+    "15": [
+      { "name": "Ira Persistente", "desc": "La tua ira termina prima del tempo solo se perdi i sensi o se scegli di farla finire." }
+    ],
+    "16": [
+      { "name": "Aumento dei Punteggi di Caratteristica", "desc": "Aumenta un punteggio di 2 o due punteggi di 1 (massimo 20), oppure scegli un talento." }
+    ],
+    "17": [
+      { "name": "Critico Brutale (3 dadi)", "desc": "Il Critico Brutale ora aggiunge tre dadi dell'arma." }
+    ],
+    "18": [
+      { "name": "Potenza Indomabile", "desc": "Se il totale di una tua prova di Forza è inferiore al tuo punteggio di Forza, puoi usare il punteggio al posto del risultato." }
+    ],
+    "19": [
+      { "name": "Aumento dei Punteggi di Caratteristica", "desc": "Aumenta un punteggio di 2 o due punteggi di 1 (massimo 20), oppure scegli un talento." }
+    ],
+    "20": [
+      { "name": "Campione Primordiale", "desc": "Forza e Costituzione aumentano di 4 ciascuna, con un nuovo massimo di 24. Le tue ire diventano illimitate." }
+    ]
+  }
+}

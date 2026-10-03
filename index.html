@@ -13,10 +13,10 @@
   <!-- Tailwind CSS Locale (Zero CDN, 100% Offline) -->
   <script src="./tailwind.cdn.js"></script>
 
-  <!-- Google Fonts per Tipografia D&D Ufficiale -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700&family=MedievalSharp&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Locali 100% Offline (Boox E-Ink, Tablet, Mobile) -->
+  <link rel="stylesheet" href="./fonts/fonts.css">
+
+  <!-- I font sono ora tutti locali in ./fonts/ per il 100% di funzionamento offline -->
   
   <!-- Foglio di Stile Personalizzato (Temi, E-Ink Boox, Quick HP) -->
   <link rel="stylesheet" href="./app.css">
@@ -105,8 +105,29 @@
         Pagina 2: Aspetto, Ritratto &amp; Note
       </button>
       <button id="tab-btn-3" class="nav-tab px-4 py-2 text-xs md:text-sm font-bold border-t-2 border-l-2 border-r-2 border-[#5d4c3f]">
-        Pagina 3: Poteri Zelota &amp; Riti Celesti
+        Pagina 3: Grimorio &amp; Poteri di Classe
       </button>
+    </div>
+
+    <!-- BARRA AZIONI RAPIDE DEL PERSONAGGIO (LEVEL UP, RIPOSO, TIRADADI) -->
+    <div class="w-full bg-[#382d23] text-stone-100 p-2 rounded-t-lg flex flex-wrap items-center justify-between gap-2 border-t-2 border-l-2 border-r-2 border-[#5d4c3f] no-print">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button id="btn-quick-levelup" class="action-btn text-xs bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold py-1 px-3 rounded shadow">
+          🔼 Sali di Livello
+        </button>
+        <button id="btn-quick-short-rest" class="action-btn text-xs bg-stone-700 hover:bg-stone-600 text-stone-100 font-bold py-1 px-3 rounded border border-stone-500">
+          ☕ Riposo Breve
+        </button>
+        <button id="btn-quick-long-rest" class="action-btn text-xs bg-emerald-800 hover:bg-emerald-700 text-stone-100 font-bold py-1 px-3 rounded border border-emerald-600">
+          ⛺ Riposo Lungo
+        </button>
+        <button id="btn-quick-dice" class="action-btn text-xs bg-stone-800 hover:bg-stone-700 text-amber-300 font-bold py-1 px-3 rounded border border-amber-600">
+          🎲 Tira Dadi
+        </button>
+      </div>
+      <div class="text-[11px] text-stone-300 flex items-center gap-2">
+        <span>Slot &amp; Risorse: <strong id="quick-res-status" class="text-amber-400">Pronto al Combattimento</strong></span>
+      </div>
     </div>
 
     <!-- Contenitore Principale Scheda -->
@@ -612,6 +633,66 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
           </div>
         </div>
 
+        <!-- SEZIONE TRACCIATORE SLOT INCANTESIMI & GRIMORIO PERSONALE -->
+        <div class="dnd-box p-3.5 bg-[#fcf9f2] mb-4 border border-[#8f7d6e] shadow-sm">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#a89686] pb-2 mb-3 gap-2">
+            <div class="flex items-center gap-2">
+              <span class="dnd-label-banner text-[10px] text-amber-950 font-bold">🔮 TRACCIATORE SLOT INCANTESIMI (1° - 9° LIVELLO)</span>
+              <span id="sheet-caster-badge" class="text-[9px] px-2 py-0.5 rounded bg-[#ede3d1] border border-[#ab9582] text-stone-700 font-bold uppercase"></span>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 text-xs">
+              <div class="flex items-center gap-1 font-bold text-stone-800">
+                <label for="sheet-spell-ability" class="text-[10px] text-stone-600 uppercase">Caratteristica:</label>
+                <select id="sheet-spell-ability" class="bg-white border border-[#8f7d6e] rounded text-xs px-1.5 py-0.5 font-bold">
+                  <option value="none">Nessuna</option>
+                  <option value="int">Intelligenza (INT)</option>
+                  <option value="wis">Saggezza (SAG)</option>
+                  <option value="cha">Carisma (CAR)</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1 font-bold text-stone-800">
+                <span class="text-[10px] text-stone-600 uppercase">CD Salvezza:</span>
+                <span id="sheet-spell-save-dc" class="font-dnd-title font-black text-sm text-[#7f1d1d] bg-white px-2 py-0.5 rounded border border-[#ab9582]">-</span>
+              </div>
+              <div class="flex items-center gap-1 font-bold text-stone-800">
+                <span class="text-[10px] text-stone-600 uppercase">Bonus TxC:</span>
+                <span id="sheet-spell-atk-bonus" class="font-dnd-title font-black text-sm text-[#7f1d1d] bg-white px-2 py-0.5 rounded border border-[#ab9582]">-</span>
+              </div>
+              <button id="btn-reset-slots-manual" class="px-2 py-1 text-[11px] rounded bg-stone-200 hover:bg-stone-300 font-semibold text-stone-700 border border-stone-400 transition" title="Ripristina tutti gli slot spuntati">
+                Ripristina Slot ↺
+              </button>
+            </div>
+          </div>
+
+          <!-- Griglia Slot Incantesimo dal 1° al 9° Livello -->
+          <div id="spell-slots-tracker-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2 mb-2">
+            <!-- Popolato dinamicamente da app.js -->
+          </div>
+
+          <div class="text-[10px] text-stone-600 flex justify-between items-center border-t border-[#d8c8b4] pt-1.5">
+            <span>💡 Spunta una casella per consumare uno slot. Con <strong>Riposo Lungo (⛺)</strong> si ripristinano tutti con un tocco.</span>
+            <span id="total-slots-summary" class="font-bold text-amber-900"></span>
+          </div>
+        </div>
+
+        <!-- SEZIONE IL MIO LIBRO DEGLI INCANTESIMI (GRIMORIO ATTIVO) -->
+        <div class="dnd-box p-3.5 bg-[#fdfbf7] mb-4 border border-[#8f7d6e] shadow-sm">
+          <div class="flex items-center justify-between border-b border-[#a89686] pb-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="dnd-label-banner text-[10px] text-amber-950 font-bold">📖 IL MIO LIBRO DEGLI INCANTESIMI (GRIMORIO PERSONALE)</span>
+              <span id="sheet-starred-count-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">0 Incantesimi</span>
+            </div>
+            <button id="btn-open-compendium-spells" class="action-btn text-xs py-1 px-3 bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold rounded shadow-sm">
+              + Aggiungi dal Compendio 🔍
+            </button>
+          </div>
+
+          <!-- Container Carte Incantesimi -->
+          <div id="sheet-spellbook-cards" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+            <!-- Popolato dinamicamente da app.js -->
+          </div>
+        </div>
+
         <!-- Tracciatore Risorse Giornaliere -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 dnd-box bg-[#f8f3e8]/85 mb-4">
           <div class="border-b md:border-b-0 md:border-r border-[#8f7d6e] px-2 py-1 flex flex-col items-center justify-center">
@@ -854,10 +935,79 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
     <div class="flex flex-wrap gap-1.5 mb-3">
       <button class="action-btn text-xs compendium-filter-btn active" data-filter="all">Tutti</button>
       <button class="action-btn text-xs compendium-filter-btn" data-filter="spells">✨ Incantesimi</button>
+      <button class="action-btn text-xs compendium-filter-btn bg-amber-800 text-amber-100" data-filter="my_spells">★ Il Mio Grimorio</button>
+      <button class="action-btn text-xs compendium-filter-btn" data-filter="feats">🎖️ Talenti</button>
       <button class="action-btn text-xs compendium-filter-btn" data-filter="classes">⚔️ Classi &amp; Sottoclassi</button>
       <button class="action-btn text-xs compendium-filter-btn" data-filter="races">🛡️ Razze</button>
-      <button class="action-btn text-xs compendium-filter-btn" data-filter="rules">📜 Regole &amp; Condizioni</button>
+      <button class="action-btn text-xs compendium-filter-btn" data-filter="backgrounds">📜 Background</button>
+      <button class="action-btn text-xs compendium-filter-btn" data-filter="rules">📖 Regole &amp; Condizioni</button>
       <button class="action-btn text-xs compendium-filter-btn" data-filter="multiclass">🔀 Multiclasse</button>
+    </div>
+
+    <!-- FILTRI AVANZATI INCANTESIMI -->
+    <div id="spell-advanced-filters" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2 p-2.5 rounded-lg bg-[#ede4d3] border border-[#ab9582] mb-3 text-xs hidden">
+      <div>
+        <label class="block font-bold text-[10px] text-stone-700 uppercase mb-0.5">Classe</label>
+        <select id="spell-filter-class" class="w-full p-1 rounded border border-[#8c7663] bg-white font-medium text-xs">
+          <option value="">Tutte le Classi</option>
+          <option value="artificer">Artefice</option>
+          <option value="bard">Bardo</option>
+          <option value="cleric">Chierico</option>
+          <option value="druid">Druido</option>
+          <option value="wizard">Mago</option>
+          <option value="paladin">Paladino</option>
+          <option value="ranger">Ranger</option>
+          <option value="sorcerer">Stregone</option>
+          <option value="warlock">Warlock</option>
+        </select>
+      </div>
+      <div>
+        <label class="block font-bold text-[10px] text-stone-700 uppercase mb-0.5">Livello</label>
+        <select id="spell-filter-level" class="w-full p-1 rounded border border-[#8c7663] bg-white font-medium text-xs">
+          <option value="">Tutti i Livelli</option>
+          <option value="0">Trucchetti (Liv. 0)</option>
+          <option value="1">1° Livello</option>
+          <option value="2">2° Livello</option>
+          <option value="3">3° Livello</option>
+          <option value="4">4° Livello</option>
+          <option value="5">5° Livello</option>
+          <option value="6">6° Livello</option>
+          <option value="7">7° Livello</option>
+          <option value="8">8° Livello</option>
+          <option value="9">9° Livello</option>
+        </select>
+      </div>
+      <div>
+        <label class="block font-bold text-[10px] text-stone-700 uppercase mb-0.5">Scuola</label>
+        <select id="spell-filter-school" class="w-full p-1 rounded border border-[#8c7663] bg-white font-medium text-xs">
+          <option value="">Tutte le Scuole</option>
+          <option value="Abiurazione">Abiurazione</option>
+          <option value="Ammaliamento">Ammaliamento</option>
+          <option value="Divinazione">Divinazione</option>
+          <option value="Evocazione">Evocazione</option>
+          <option value="Illusione">Illusione</option>
+          <option value="Invocazione">Invocazione</option>
+          <option value="Necromanzia">Necromanzia</option>
+          <option value="Trasmutazione">Trasmutazione</option>
+        </select>
+      </div>
+      <div>
+        <label class="block font-bold text-[10px] text-stone-700 uppercase mb-0.5">Fonte</label>
+        <select id="spell-filter-source" class="w-full p-1 rounded border border-[#8c7663] bg-white font-medium text-xs">
+          <option value="">Tutti i Manuali</option>
+          <option value="PHB">Manuale Giocatore (PHB)</option>
+          <option value="XGtE">Guida Xanathar (XGtE)</option>
+          <option value="TCoE">Calderone Tasha (TCoE)</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-3 pt-4 col-span-2 sm:col-span-1">
+        <label class="flex items-center gap-1 cursor-pointer font-bold text-stone-800 text-[11px]">
+          <input type="checkbox" id="spell-filter-conc" class="dnd-circle-check"> Conc.
+        </label>
+        <label class="flex items-center gap-1 cursor-pointer font-bold text-stone-800 text-[11px]">
+          <input type="checkbox" id="spell-filter-ritual" class="dnd-circle-check"> Rito
+        </label>
+      </div>
     </div>
 
     <div id="compendium-results-list" class="max-h-[65vh] overflow-y-auto pr-1"></div>
@@ -877,6 +1027,138 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
 
     <div id="saved-characters-list"></div>
   </section>
+
+  <!-- ========================================================================= -->
+  <!-- MODALI DI GIOCO: LEVEL UP, RIPOSO, TIRADADI                              -->
+  <!-- ========================================================================= -->
+
+  <!-- MODAL SALI DI LIVELLO -->
+  <div id="modal-levelup" class="fixed inset-0 bg-black/75 z-[300] flex items-center justify-center p-3 hidden">
+    <div class="parchment w-full max-w-[500px] rounded-xl p-5 border-2 border-[#5d4c3f] shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b-2 border-[#5d4c3f] pb-2 mb-3">
+        <h3 class="font-dnd-heading text-lg text-stone-900">🔼 Sali di Livello</h3>
+        <button id="modal-levelup-close" class="text-xl font-bold text-stone-700 hover:text-red-700">&times;</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-stone-800">
+        <div class="p-2.5 rounded bg-[#f4ebd9] border border-[#ab9582] flex items-center justify-between">
+          <span>Avanzamento:</span>
+          <strong id="levelup-preview-text" class="text-sm font-dnd-title text-[#7f1d1d]">Livello 6 ➔ 7</strong>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-900 mb-1">Modalità Incremento Punti Ferita (PF):</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="p-2 rounded border border-[#8c7663] bg-white flex items-center gap-2 cursor-pointer font-semibold">
+              <input type="radio" name="hp-mode" value="average" checked id="hp-mode-avg"> Media del Dado (+Costituzione)
+            </label>
+            <label class="p-2 rounded border border-[#8c7663] bg-white flex items-center gap-2 cursor-pointer font-semibold">
+              <input type="radio" name="hp-mode" value="roll" id="hp-mode-roll"> Tiro del Dado Vita
+            </label>
+          </div>
+          <div id="hp-roll-input-container" class="mt-2 hidden">
+            <label class="block text-[11px] font-bold text-stone-700 mb-0.5">Risultato del tiro del Dado Vita:</label>
+            <input type="number" id="levelup-hp-roll" min="1" max="12" class="w-full p-1.5 border border-[#8c7663] rounded bg-white text-center font-bold text-sm" placeholder="Es. 8">
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded bg-[#efe6d5] border border-[#ab9582]">
+          <span class="block font-bold text-stone-900 mb-1">Nuovi Privilegi del Livello:</span>
+          <div id="levelup-features-preview" class="text-stone-700 space-y-1">
+            <em>Calcolo dei nuovi privilegi in corso...</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-[#5d4c3f]">
+        <button id="modal-levelup-cancel" class="action-btn text-xs py-1.5 px-3">Annulla</button>
+        <button id="modal-levelup-confirm" class="action-btn text-xs py-1.5 px-4 bg-amber-800 hover:bg-amber-700 text-stone-100 font-bold">⚡ Conferma Passaggio di Livello</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL RIPOSO BREVE -->
+  <div id="modal-shortrest" class="fixed inset-0 bg-black/75 z-[300] flex items-center justify-center p-3 hidden">
+    <div class="parchment w-full max-w-[420px] rounded-xl p-5 border-2 border-[#5d4c3f] shadow-2xl relative">
+      <div class="flex items-center justify-between border-b-2 border-[#5d4c3f] pb-2 mb-3">
+        <h3 class="font-dnd-heading text-lg text-stone-900">☕ Riposo Breve (1 Ora)</h3>
+        <button id="modal-shortrest-close" class="text-xl font-bold text-stone-700 hover:text-red-700">&times;</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-stone-800">
+        <p class="text-stone-700">Durante un riposo breve puoi spendere uno o più Dadi Vita per curare i tuoi Punti Ferita, e recuperi le risorse ricaricabili a riposo breve.</p>
+        
+        <div>
+          <label class="block font-bold text-stone-900 mb-1">Dadi Vita da Spendere:</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="shortrest-dice-count" min="1" max="20" value="1" class="w-20 p-2 border border-[#8c7663] rounded bg-white text-center font-bold text-base">
+            <span id="shortrest-dice-type" class="text-xs font-semibold text-stone-600">(Dadi disponibili)</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-900 mb-1">Punti Ferita Totali Recuperati:</label>
+          <div class="flex items-center gap-2">
+            <input type="number" id="shortrest-hp-recovered" min="1" max="200" value="8" class="flex-1 p-2 border border-[#8c7663] rounded bg-white text-center font-bold text-base text-emerald-800">
+            <button id="btn-roll-hit-dice" class="action-btn text-xs py-2 px-3 bg-amber-700 text-white font-bold shrink-0">🎲 Tira Automatico</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-[#5d4c3f]">
+        <button id="modal-shortrest-cancel" class="action-btn text-xs py-1.5 px-3">Annulla</button>
+        <button id="modal-shortrest-confirm" class="action-btn text-xs py-1.5 px-4 bg-emerald-800 hover:bg-emerald-700 text-white font-bold">Applica Riposo Breve</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL TIRADADI INTERATTIVO RAPIDO -->
+  <div id="modal-diceroller" class="fixed inset-0 bg-black/75 z-[300] flex items-center justify-center p-3 hidden">
+    <div class="parchment w-full max-w-[440px] rounded-xl p-5 border-2 border-[#5d4c3f] shadow-2xl relative">
+      <div class="flex items-center justify-between border-b-2 border-[#5d4c3f] pb-2 mb-3">
+        <h3 class="font-dnd-heading text-lg text-stone-900">🎲 Tiradadi Rapido D&amp;D</h3>
+        <button id="modal-diceroller-close" class="text-xl font-bold text-stone-700 hover:text-red-700">&times;</button>
+      </div>
+
+      <!-- Schermo Risultato Tiro -->
+      <div class="bg-[#241a14] text-amber-200 rounded-lg p-3 text-center mb-3 border-2 border-amber-600 shadow-inner">
+        <div id="dice-roll-formula" class="text-[11px] text-stone-400 uppercase tracking-wider mb-0.5">Tira un dado</div>
+        <div id="dice-roll-total" class="text-4xl font-dnd-title font-black text-amber-300">--</div>
+        <div id="dice-roll-breakdown" class="text-xs text-stone-300 mt-1">Seleziona d20 o altri dadi sotto</div>
+      </div>
+
+      <!-- Pulsanti Dadi -->
+      <div class="grid grid-cols-4 gap-1.5 mb-3">
+        <button class="action-btn font-bold py-2 text-sm bg-amber-900 text-white dice-btn" data-sides="20">d20</button>
+        <button class="action-btn font-bold py-2 text-sm bg-stone-800 text-amber-200 dice-btn" data-sides="12">d12</button>
+        <button class="action-btn font-bold py-2 text-sm bg-stone-800 text-amber-200 dice-btn" data-sides="10">d10</button>
+        <button class="action-btn font-bold py-2 text-sm bg-stone-800 text-amber-200 dice-btn" data-sides="8">d8</button>
+        <button class="action-btn font-bold py-2 text-sm bg-stone-800 text-amber-200 dice-btn" data-sides="6">d6</button>
+        <button class="action-btn font-bold py-2 text-sm bg-stone-800 text-amber-200 dice-btn" data-sides="4">d4</button>
+        <button class="action-btn font-bold py-2 text-sm bg-stone-800 text-amber-200 dice-btn" data-sides="100">d100</button>
+        <button id="dice-btn-clear" class="action-btn font-bold py-2 text-xs bg-red-900 text-white">Azzera</button>
+      </div>
+
+      <!-- Opzioni Vantaggio / Svantaggio & Modificatore -->
+      <div class="flex items-center justify-between gap-2 p-2 rounded bg-[#ede4d3] border border-[#ab9582] text-xs">
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-1 cursor-pointer font-bold">
+            <input type="radio" name="dice-adv" value="norm" checked class="dnd-circle-check"> Normale
+          </label>
+          <label class="flex items-center gap-1 cursor-pointer font-bold text-emerald-800">
+            <input type="radio" name="dice-adv" value="adv" class="dnd-circle-check"> Vant.
+          </label>
+          <label class="flex items-center gap-1 cursor-pointer font-bold text-red-800">
+            <input type="radio" name="dice-adv" value="dis" class="dnd-circle-check"> Svant.
+          </label>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="font-bold">Mod:</span>
+          <input type="number" id="dice-mod-input" value="0" class="w-12 p-1 border border-[#8c7663] rounded bg-white text-center font-bold">
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- BARRA DI NAVIGAZIONE INFERIORE (SMARTPHONE)                              -->

@@ -84,7 +84,11 @@ const App = {
           bonusDmg: 0
         }
       ],
-      portraitDataUrl: null
+      portraitDataUrl: null,
+      spells: [],
+      spellSlots: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      spellSlotsUsed: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      spellAbility: "none"
     },
 
     getModifier(score) {
@@ -137,6 +141,7 @@ const App = {
     this.initSheetController();
     this.initWizard();
     this.initCompendium();
+    this.initQuickActions();
     this.initPWA();
     this.loadSavedState();
   },
@@ -722,6 +727,9 @@ const App = {
     const payload = this.collectSheetData();
     const id = this.activeCharId || "char_active";
     this.activeCharId = DND_ENGINE.saveCharacter(payload, id);
+    if (DND_ENGINE.saveCharacterAsync) {
+      DND_ENGINE.saveCharacterAsync(payload, id).catch(err => console.warn("IndexedDB save:", err));
+    }
 
     const indicator = document.getElementById("autosave-indicator");
     if (indicator) {
@@ -733,13 +741,17 @@ const App = {
 
   collectSheetData() {
     const fields = {};
-    document.querySelectorAll("#sheet input[type='text'], #sheet input[type='number'], #sheet textarea").forEach(el => {
+    document.querySelectorAll("#sheet input[type='text'], #sheet input[type='number'], #sheet textarea, #sheet select").forEach(el => {
       if (el.id) fields[el.id] = el.value;
     });
 
     return {
       version: "2.0",
       model: this.model.data,
+      spells: this.model.spells || this.model.data?.spells || [],
+      spellSlots: this.model.spellSlots || [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      spellSlotsUsed: this.model.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      spellAbility: this.model.spellAbility || "none",
       fields
     };
   },
@@ -747,6 +759,10 @@ const App = {
   applySheetData(payload) {
     if (!payload || !payload.model) return;
     this.model.data = payload.model;
+    this.model.spells = payload.spells || payload.model?.spells || this.model.spells || [];
+    this.model.spellSlots = payload.spellSlots || payload.model?.spellSlots || this.model.spellSlots || [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this.model.spellSlotsUsed = payload.spellSlotsUsed || payload.model?.spellSlotsUsed || this.model.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    this.model.spellAbility = payload.spellAbility || payload.model?.spellAbility || this.model.spellAbility || "none";
 
     if (payload.fields) {
       Object.entries(payload.fields).forEach(([id, val]) => {
@@ -764,6 +780,8 @@ const App = {
     this.renderSavingThrows();
     this.renderSkills();
     this.renderWeapons();
+    this.renderSpellSlots();
+    this.renderSheetSpellbook();
     this.updateAllCalculations();
     this.autoResizeAllTextareas();
   },
@@ -1346,21 +1364,44 @@ const App = {
   initCompendium() {
     const input = document.getElementById("compendium-search-input");
     const filterBtns = document.querySelectorAll(".compendium-filter-btn");
+    const advFiltersBox = document.getElementById("spell-advanced-filters");
 
     let currentFilter = "all";
 
+    const triggerRender = () => {
+      this.renderCompendium(input ? input.value.trim().toLowerCase() : "", currentFilter);
+    };
+
     if (input) {
-      input.addEventListener("input", () => {
-        this.renderCompendium(input.value.trim().toLowerCase(), currentFilter);
-      });
+      input.addEventListener("input", triggerRender);
     }
+
+    // Filtri avanzati incantesimi (classe, livello, scuola, fonte, conc, rito)
+    ["spell-filter-class", "spell-filter-level", "spell-filter-school", "spell-filter-source"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("change", triggerRender);
+    });
+    ["spell-filter-conc", "spell-filter-ritual"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("change", triggerRender);
+    });
 
     filterBtns.forEach(btn => {
       btn.addEventListener("click", () => {
         filterBtns.forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         currentFilter = btn.getAttribute("data-filter");
-        this.renderCompendium(input ? input.value.trim().toLowerCase() : "", currentFilter);
+
+        // Mostra filtri avanzati solo per Incantesimi o Il Mio Grimorio
+        if (advFiltersBox) {
+          if (currentFilter === "spells" || currentFilter === "my_spells") {
+            advFiltersBox.classList.remove("hidden");
+          } else {
+            advFiltersBox.classList.add("hidden");
+          }
+        }
+
+        triggerRender();
       });
     });
 
@@ -1373,61 +1414,121 @@ const App = {
     container.innerHTML = "";
 
     const items = [];
+    const mySpells = this.model.spells || [];
 
-    // INCANTESIMI
-    if (filter === "all" || filter === "spells") {
-      DND_DATA.spells.forEach(s => {
+    // Recupera valori filtri avanzati incantesimi
+    const spellClass = document.getElementById("spell-filter-class")?.value || "";
+    const spellLevel = document.getElementById("spell-filter-level")?.value || "";
+    const spellSchool = document.getElementById("spell-filter-school")?.value || "";
+    const spellSource = document.getElementById("spell-filter-source")?.value || "";
+    const spellConc = document.getElementById("spell-filter-conc")?.checked || false;
+    const spellRitual = document.getElementById("spell-filter-ritual")?.checked || false;
+
+    // INCANTESIMI & IL MIO GRIMORIO
+    if (filter === "all" || filter === "spells" || filter === "my_spells") {
+      (DND_DATA.spells || []).forEach(s => {
+        // Se filtro "Il Mio Grimorio", mostra solo incantesimi salvati per il personaggio
+        if (filter === "my_spells" && !mySpells.includes(s.id)) {
+          return;
+        }
+
+        // Filtri avanzati
+        if (filter === "spells" || filter === "my_spells") {
+          if (spellClass && !(s.classes || []).includes(spellClass)) return;
+          if (spellLevel !== "" && String(s.level) !== spellLevel) return;
+          if (spellSchool && s.school !== spellSchool) return;
+          if (spellSource && s.source !== spellSource) return;
+          if (spellConc && !s.concentration) return;
+          if (spellRitual && !s.ritual) return;
+        }
+
         const classNames = (s.classes || []).map(cid => {
-          const found = DND_DATA.classes.find(c => c.id === cid);
+          const found = (DND_DATA.classes || []).find(c => c.id === cid);
           return found ? found.name : cid;
         }).join(", ");
+
+        const isStarred = mySpells.includes(s.id);
+        const tags = [];
+        if (s.concentration) tags.push("Concentrazione");
+        if (s.ritual) tags.push("Rituale");
+        if (s.source) tags.push(s.source);
+
         items.push({
           type: "Incantesimo",
+          id: s.id,
+          spellObj: s,
+          isSpell: true,
+          isStarred: isStarred,
           title: s.name,
           badge: `Liv. ${s.level === 0 ? 'Trucchetto' : s.level} • ${s.school}`,
+          tags: tags.join(" • "),
           desc: `• Tempo di Lancio: ${s.time}\n• Gittata: ${s.range}\n• Componenti: ${s.components}\n• Durata: ${s.duration}\n• Classi: ${classNames || 'Tutte'}\n\n${s.desc}`
+        });
+      });
+    }
+
+    // TALENTI
+    if (filter === "all" || filter === "feats") {
+      (DND_DATA.feats || []).forEach(f => {
+        items.push({
+          type: "Talento",
+          title: f.name,
+          badge: f.source || "PHB",
+          desc: `${f.prerequisite ? `Prerequisito: ${f.prerequisite}\n\n` : ''}${f.desc}`
         });
       });
     }
 
     // CLASSI E SOTTOCLASSI
     if (filter === "all" || filter === "classes") {
-      DND_DATA.classes.forEach(c => {
+      (DND_DATA.classes || []).forEach(c => {
         items.push({
           type: "Classe",
           title: c.name,
           badge: `Dado Vita d${c.hitDie}`,
-          desc: `Tiri Salvezza: ${c.savingThrows.join(", ").toUpperCase()}\nArmature: ${(c.armorProficiencies || []).join(", ") || "Nessuna"}\nArmi: ${(c.weaponProficiencies || []).join(", ")}`
+          desc: `Tiri Salvezza: ${(c.savingThrows || []).join(", ").toUpperCase()}\nArmature: ${(c.armorProficiencies || []).join(", ") || "Nessuna"}\nArmi: ${(c.weaponProficiencies || []).join(", ")}`
         });
       });
-      DND_DATA.subclasses.forEach(s => {
+      (DND_DATA.subclasses || []).forEach(s => {
         items.push({
           type: "Sottoclasse",
           title: s.name,
           badge: s.source,
-          desc: `${s.desc}\n\nPrivilegi:\n${s.features.map(f => `• [Liv. ${f.level}] ${f.name}: ${f.desc}`).join('\n')}`
+          desc: `${s.desc}\n\nPrivilegi:\n${(s.features || []).map(f => `• [Liv. ${f.level}] ${f.name}: ${f.desc}`).join('\n')}`
         });
       });
     }
 
     // RAZZE
     if (filter === "all" || filter === "races") {
-      DND_DATA.races.forEach(r => {
+      (DND_DATA.races || []).forEach(r => {
         items.push({
           type: "Razza",
           title: r.name,
           badge: r.source,
-          desc: `Velocità: ${r.speed}m | Taglia: ${r.size}\n\nTratti:\n${r.traits.map(t => `• ${t.name}: ${t.desc}`).join('\n')}`
+          desc: `Velocità: ${r.speed}m | Taglia: ${r.size}\n\nTratti:\n${(r.traits || []).map(t => `• ${t.name}: ${t.desc}`).join('\n')}`
+        });
+      });
+    }
+
+    // BACKGROUNDS
+    if (filter === "all" || filter === "backgrounds") {
+      (DND_DATA.backgrounds || []).forEach(b => {
+        items.push({
+          type: "Background",
+          title: b.name,
+          badge: "Sfondo Ufficiale",
+          desc: `Abilità: ${(b.skills || []).join(", ")}\nEquipaggiamento: ${(b.equipment || []).join(", ")}\n\nPrivilegio: ${b.feature}`
         });
       });
     }
 
     // REGOLE & CONDIZIONI
     if (filter === "all" || filter === "rules") {
-      DND_DATA.rules.combatActions.forEach(a => {
+      (DND_DATA.rules?.combatActions || []).forEach(a => {
         items.push({ type: "Azione", title: a.name, badge: "Regola di Combattimento", desc: a.desc });
       });
-      DND_DATA.rules.conditions.forEach(c => {
+      (DND_DATA.rules?.conditions || []).forEach(c => {
         items.push({ type: "Condizione", title: c.name, badge: "Stato", desc: c.desc });
       });
     }
@@ -1438,12 +1539,11 @@ const App = {
         type: "Multiclasse",
         title: "Regole Generali Multiclasse (PHB Cap. 6)",
         badge: "Regola Ufficiale",
-        desc: `Il multiclassamento consente di avanzare di livello in classi diverse ad ogni aumento di livello.\n\n• Requisiti di Caratteristica: Per qualificarsi per una nuova classe o per uscire dalla classe attuale, devi avere almeno 13 nel punteggio primario di entrambe le classi!\n• Punti Ferita & Dadi Vita: Guadagni il dado vita della classe in cui sali di livello. Al 1° livello del personaggio prendi il dado massimo; per tutti i livelli successivi (inclusi quelli di una nuova classe) tiri o prendi la media.\n• Bonus di Competenza: È basato sempre sul LIVELLO TOTALE del personaggio, non su quello della singola classe!\n• Attacco Extra: Non si cumula. Ottenere Attacco Extra da due classi diverse (es. Barbaro 5 / Guerriero 5) non conferisce 3 attacchi.`
+        desc: `Il multiclassamento consente di avanzare di livello in classi diverse ad ogni aumento di livello.\n\n• Requisiti di Caratteristica: Per qualificarsi per una nuova classe o per uscire dalla classe attuale, devi avere almeno 13 nel punteggio primario di entrambe le classi!\n• Punti Ferita & Dadi Vita: Guadagni il dado vita della classe in cui sali di livello. Al 1° livello del personaggio prendi il dado massimo; per tutti i livelli successivi (inclusi quelli di una nuova classe) tiri o prendi la media.\n• Bonus di Competenza: È basato sempre sul LIVELLO TOTALE del personaggio, non su quello della singola classe!\n• Attacco Extra: Non si cumula. Ottenere Attacco Extra da due classi diverse non conferisce 3 attacchi.`
       });
 
-      // Tabella Requisiti
-      const prereqsList = Object.keys(DND_DATA.multiclass.prerequisites).map(cid => {
-        const cls = DND_DATA.classes.find(c => c.id === cid);
+      const prereqsList = Object.keys(DND_DATA.multiclass?.prerequisites || {}).map(cid => {
+        const cls = (DND_DATA.classes || []).find(c => c.id === cid);
         const req = DND_DATA.multiclass.prerequisites[cid];
         return `• ${cls?.name || cid}: ${req.label}`;
       }).join('\n');
@@ -1455,9 +1555,8 @@ const App = {
         desc: `Punteggio minimo di 13 richiesto sia per la classe corrente che per la nuova classe:\n\n${prereqsList}`
       });
 
-      // Competenze Acquisite
-      const profsList = Object.keys(DND_DATA.multiclass.proficienciesGained).map(cid => {
-        const cls = DND_DATA.classes.find(c => c.id === cid);
+      const profsList = Object.keys(DND_DATA.multiclass?.proficienciesGained || {}).map(cid => {
+        const cls = (DND_DATA.classes || []).find(c => c.id === cid);
         const p = DND_DATA.multiclass.proficienciesGained[cid];
         return `• ${cls?.name || cid}: ${p.length > 0 ? p.join(", ") : "Nessuna competenza aggiuntiva"}`;
       }).join('\n');
@@ -1469,7 +1568,6 @@ const App = {
         desc: `Quando acquisisci il tuo primo livello in una classe successiva alla prima, ottieni SOLO le seguenti competenze:\n\n${profsList}`
       });
 
-      // Incantesimi Multiclasse
       items.push({
         type: "Multiclasse",
         title: "Incantesimi & Slot Multiclasse",
@@ -1484,26 +1582,266 @@ const App = {
     });
 
     if (filtered.length === 0) {
-      container.innerHTML = `<div class="p-6 text-center text-stone-500">Nessun risultato nel compendio per "${query}".</div>`;
+      container.innerHTML = `<div class="p-6 text-center text-stone-500">Nessun elemento trovato nel compendio con i filtri attuali.</div>`;
       return;
     }
 
     filtered.forEach(it => {
       const card = document.createElement("div");
-      card.className = "p-3 mb-2 rounded-lg border border-stone-300 bg-white/80 shadow-sm";
+      card.className = "p-3 mb-2 rounded-lg border border-stone-300 bg-white/80 shadow-sm relative transition-all";
+
+      let starBtnHtml = "";
+      if (it.isSpell) {
+        starBtnHtml = `
+          <button class="btn-toggle-spell text-xs font-bold px-2 py-1 rounded border transition-colors shrink-0 ${it.isStarred ? 'bg-amber-600 text-stone-950 border-amber-700' : 'bg-stone-100 hover:bg-stone-200 text-stone-700 border-stone-400'}" data-spell-id="${it.id}">
+            ${it.isStarred ? '★ Nel Grimorio' : '☆ Aggiungi'}
+          </button>
+        `;
+      }
+
       card.innerHTML = `
-        <div class="flex items-center justify-between mb-1 gap-2">
-          <div class="font-bold text-sm text-stone-900 break-words">${it.title}</div>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300 shrink-0">${it.type} (${it.badge})</span>
+        <div class="flex items-start justify-between mb-1.5 gap-2">
+          <div>
+            <div class="font-bold text-sm text-stone-900 break-words">${it.title}</div>
+            <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">${it.type} (${it.badge})</span>
+              ${it.tags ? `<span class="text-[10px] font-semibold text-stone-500">${it.tags}</span>` : ''}
+            </div>
+          </div>
+          ${starBtnHtml}
         </div>
         <div class="text-xs text-stone-700 whitespace-pre-line leading-relaxed break-words">${it.desc}</div>
       `;
+
+      if (it.isSpell) {
+        const btn = card.querySelector(".btn-toggle-spell");
+        if (btn) {
+          btn.addEventListener("click", () => {
+            if (!this.model.spells) this.model.spells = [];
+            const idx = this.model.spells.indexOf(it.id);
+            if (idx >= 0) {
+              this.model.spells.splice(idx, 1);
+            } else {
+              this.model.spells.push(it.id);
+            }
+            this.saveCurrentCharacter();
+            this.renderCompendium(query, filter);
+            this.renderSheetSpellbook();
+          });
+        }
+      }
+
       container.appendChild(card);
     });
   },
 
   // ---------------------------------------------------------------------------
-  // PWA REGISTRATION & GESTIONE AGGIORNAMENTI (Offline Ready)
+  // GESTIONE AZIONI RAPIDE DEL PERSONAGGIO (LEVEL UP, RIPOSO, TIRADADI)
+  // ---------------------------------------------------------------------------
+  initQuickActions() {
+    // 1. SALI DI LIVELLO (LEVEL UP)
+    const btnLevelUp = document.getElementById("btn-quick-levelup");
+    const modalLevelUp = document.getElementById("modal-levelup");
+    const btnLevelUpClose = document.getElementById("modal-levelup-close");
+    const btnLevelUpCancel = document.getElementById("modal-levelup-cancel");
+    const btnLevelUpConfirm = document.getElementById("modal-levelup-confirm");
+    const hpModeAvg = document.getElementById("hp-mode-avg");
+    const hpModeRoll = document.getElementById("hp-mode-roll");
+    const hpRollContainer = document.getElementById("hp-roll-input-container");
+    const hpRollInput = document.getElementById("levelup-hp-roll");
+
+    if (btnLevelUp && modalLevelUp) {
+      btnLevelUp.addEventListener("click", () => {
+        const previewText = document.getElementById("levelup-preview-text");
+        const featuresPreview = document.getElementById("levelup-features-preview");
+        
+        // Simula levelUp per mostrare l'anteprima
+        const dummyData = JSON.parse(JSON.stringify(this.collectSheetData()));
+        const preview = DND_ENGINE.levelUp(dummyData, { hpMode: "average" });
+
+        if (!preview.success) {
+          alert(preview.message);
+          return;
+        }
+
+        if (previewText) previewText.textContent = `Livello ➔ ${preview.newLevel} (+${preview.hpGain} PF)`;
+        if (featuresPreview) {
+          if (preview.unlockedFeatures && preview.unlockedFeatures.length > 0) {
+            featuresPreview.innerHTML = preview.unlockedFeatures.map(f => `<div class="font-bold text-amber-900">• ${f.name}</div><div class="text-[11px] text-stone-600 mb-1">${f.desc}</div>`).join("");
+          } else {
+            featuresPreview.innerHTML = `<em>Nessun privilegio specifico per questo livello di classe.</em>`;
+          }
+          if (preview.isAsiLevel) {
+            featuresPreview.innerHTML += `<div class="mt-2 p-1.5 rounded bg-amber-200 border border-amber-400 font-bold text-amber-950">🎉 LIVELLO ASI: Puoi aumentare una caratteristica di +2, due di +1 oppure scegliere un Talento!</div>`;
+          }
+        }
+
+        modalLevelUp.classList.remove("hidden");
+      });
+
+      const closeLevelUpModal = () => modalLevelUp.classList.add("hidden");
+      if (btnLevelUpClose) btnLevelUpClose.addEventListener("click", closeLevelUpModal);
+      if (btnLevelUpCancel) btnLevelUpCancel.addEventListener("click", closeLevelUpModal);
+
+      if (hpModeAvg && hpModeRoll && hpRollContainer) {
+        hpModeAvg.addEventListener("change", () => hpRollContainer.classList.add("hidden"));
+        hpModeRoll.addEventListener("change", () => hpRollContainer.classList.remove("hidden"));
+      }
+
+      if (btnLevelUpConfirm) {
+        btnLevelUpConfirm.addEventListener("click", () => {
+          const hpMode = hpModeRoll.checked ? "roll" : "average";
+          const hpRoll = hpRollInput ? parseInt(hpRollInput.value, 10) : 0;
+
+          const currentPayload = this.collectSheetData();
+          const result = DND_ENGINE.levelUp(currentPayload, { hpMode, hpRoll });
+
+          if (result.success) {
+            this.applySheetData(currentPayload);
+            this.saveCurrentCharacter();
+            closeLevelUpModal();
+            alert(`🎉 Congratulazioni! Sei salito al Livello ${result.newLevel}! (+${result.hpGain} PF massimi). Nuovi PF: ${result.newMaxHp}.`);
+          } else {
+            alert(result.message);
+          }
+        });
+      }
+    }
+
+    // 2. RIPOSO BREVE (SHORT REST)
+    const btnShortRest = document.getElementById("btn-quick-short-rest");
+    const modalShortRest = document.getElementById("modal-shortrest");
+    const btnShortRestClose = document.getElementById("modal-shortrest-close");
+    const btnShortRestCancel = document.getElementById("modal-shortrest-cancel");
+    const btnShortRestConfirm = document.getElementById("modal-shortrest-confirm");
+    const btnRollHitDice = document.getElementById("btn-roll-hit-dice");
+    const hpRecoveredInput = document.getElementById("shortrest-hp-recovered");
+    const diceCountInput = document.getElementById("shortrest-dice-count");
+
+    if (btnShortRest && modalShortRest) {
+      btnShortRest.addEventListener("click", () => {
+        modalShortRest.classList.remove("hidden");
+      });
+
+      const closeShortRest = () => modalShortRest.classList.add("hidden");
+      if (btnShortRestClose) btnShortRestClose.addEventListener("click", closeShortRest);
+      if (btnShortRestCancel) btnShortRestCancel.addEventListener("click", closeShortRest);
+
+      if (btnRollHitDice) {
+        btnRollHitDice.addEventListener("click", () => {
+          const count = parseInt(diceCountInput?.value || 1, 10);
+          const conMod = DND_ENGINE.calcMod(this.model.data?.stats?.con || 14);
+          let totalHeal = 0;
+          for (let i = 0; i < count; i++) {
+            totalHeal += Math.floor(Math.random() * 12) + 1 + conMod;
+          }
+          if (hpRecoveredInput) hpRecoveredInput.value = Math.max(count, totalHeal);
+        });
+      }
+
+      if (btnShortRestConfirm) {
+        btnShortRestConfirm.addEventListener("click", () => {
+          const hpRec = parseInt(hpRecoveredInput?.value || 0, 10);
+          const payload = this.collectSheetData();
+          const res = DND_ENGINE.shortRest(payload, { hpRecovered: hpRec });
+
+          this.applySheetData(payload);
+          this.saveCurrentCharacter();
+          closeShortRest();
+          alert(res.message);
+        });
+      }
+    }
+
+    // 3. RIPOSO LUNGO (LONG REST)
+    const btnLongRest = document.getElementById("btn-quick-long-rest");
+    if (btnLongRest) {
+      btnLongRest.addEventListener("click", () => {
+        if (confirm("Vuoi eseguire un Riposo Lungo di 8 ore?\n\n• Ripristina tutti i tuoi Punti Ferita (PF) al massimo\n• Ricarica tutti gli slot incantesimo e gli usi di classe (Ira, ecc.)\n• Rimuove PF temporanei.")) {
+          const payload = this.collectSheetData();
+          const res = DND_ENGINE.longRest(payload);
+
+          for (let i = 1; i <= 4; i++) {
+            const cb = document.getElementById(`rage-slot-${i}`);
+            if (cb) cb.checked = false;
+          }
+          const ff = document.getElementById("fanatical-focus-used");
+          if (ff) ff.checked = false;
+
+          this.model.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+          this.applySheetData(payload);
+          this.saveCurrentCharacter();
+          alert(res.message);
+        }
+      });
+    }
+
+    // 4. TIRADADI RAPIDO (DICE ROLLER)
+    const btnDice = document.getElementById("btn-quick-dice");
+    const modalDice = document.getElementById("modal-diceroller");
+    const btnDiceClose = document.getElementById("modal-diceroller-close");
+    const diceTotalDisplay = document.getElementById("dice-roll-total");
+    const diceFormulaDisplay = document.getElementById("dice-roll-formula");
+    const diceBreakdownDisplay = document.getElementById("dice-roll-breakdown");
+    const diceModInput = document.getElementById("dice-mod-input");
+    const diceClear = document.getElementById("dice-btn-clear");
+
+    if (btnDice && modalDice) {
+      btnDice.addEventListener("click", () => {
+        modalDice.classList.remove("hidden");
+      });
+
+      if (btnDiceClose) btnDiceClose.addEventListener("click", () => modalDice.classList.add("hidden"));
+
+      const diceBtns = modalDice.querySelectorAll(".dice-btn");
+      diceBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const sides = parseInt(btn.getAttribute("data-sides"), 10) || 20;
+          const mod = parseInt(diceModInput?.value || 0, 10);
+          const advMode = document.querySelector("input[name='dice-adv']:checked")?.value || "norm";
+
+          let roll1 = Math.floor(Math.random() * sides) + 1;
+          let roll2 = Math.floor(Math.random() * sides) + 1;
+          let finalRoll = roll1;
+          let breakdown = `Tiro: [${roll1}]`;
+
+          if (sides === 20 && advMode === "adv") {
+            finalRoll = Math.max(roll1, roll2);
+            breakdown = `Vantaggio: [${roll1}, ${roll2}] ➔ Scelto: ${finalRoll}`;
+          } else if (sides === 20 && advMode === "dis") {
+            finalRoll = Math.min(roll1, roll2);
+            breakdown = `Svantaggio: [${roll1}, ${roll2}] ➔ Scelto: ${finalRoll}`;
+          }
+
+          const total = finalRoll + mod;
+          if (mod !== 0) {
+            breakdown += ` + (${mod}) = ${total}`;
+          }
+
+          if (diceFormulaDisplay) diceFormulaDisplay.textContent = `Tiro 1d${sides}${mod ? (mod >= 0 ? '+' + mod : mod) : ''}`;
+          if (diceTotalDisplay) {
+            diceTotalDisplay.textContent = total;
+            diceTotalDisplay.style.color = (sides === 20 && finalRoll === 20) ? "#10b981" : ((sides === 20 && finalRoll === 1) ? "#ef4444" : "#fcd34d");
+          }
+          if (diceBreakdownDisplay) diceBreakdownDisplay.textContent = breakdown;
+        });
+      });
+
+      if (diceClear) {
+        diceClear.addEventListener("click", () => {
+          if (diceFormulaDisplay) diceFormulaDisplay.textContent = "Tira un dado";
+          if (diceTotalDisplay) {
+            diceTotalDisplay.textContent = "--";
+            diceTotalDisplay.style.color = "#fcd34d";
+          }
+          if (diceBreakdownDisplay) diceBreakdownDisplay.textContent = "Seleziona d20 o altri dadi sotto";
+        });
+      }
+    }
+  },
+
+  // ---------------------------------------------------------------------------
+
   // ---------------------------------------------------------------------------
   initPWA() {
     if ('serviceWorker' in navigator) {
@@ -1511,9 +1849,15 @@ const App = {
         navigator.serviceWorker.register('./sw.js').then(reg => {
           console.log('PWA Service Worker attivo:', reg.scope);
 
+          // Un aggiornamento era già scaricato e in attesa (es. app chiusa prima di aggiornare)
+          if (reg.waiting && navigator.serviceWorker.controller) {
+            this.showUpdateBanner(reg.waiting);
+          }
+
           // Controlla se c'è un aggiornamento disponibile
           reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
+            if (!newWorker) return;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // Nuova versione scaricata! Mostra il banner di avviso
@@ -1521,12 +1865,19 @@ const App = {
               }
             });
           });
+
+          // L'app installata può restare aperta per giorni: ricontrolla quando torna in primo piano
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && navigator.onLine) {
+              reg.update().catch(() => {});
+            }
+          });
         }).catch(err => console.warn('PWA SW non registrato:', err));
 
-        let refreshing = false;
+        // Ricarica SOLO se l'utente ha premuto "Aggiorna Ora"
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          if (!refreshing) {
-            refreshing = true;
+          if (this._userRequestedUpdate && !this._refreshing) {
+            this._refreshing = true;
             window.location.reload();
           }
         });
@@ -1539,10 +1890,13 @@ const App = {
     const btn = document.getElementById("pwa-update-btn");
     if (banner && btn) {
       banner.classList.remove("hidden");
-      btn.addEventListener("click", () => {
+      btn.onclick = async () => {
         btn.textContent = "Aggiornamento in corso...";
+        this._userRequestedUpdate = true;
+        // Salva la scheda prima di ricaricare
+        try { if (typeof this.saveCurrent === "function") await this.saveCurrent(); } catch (e) {}
         worker.postMessage({ type: 'SKIP_WAITING' });
-      });
+      };
     }
   }
 };
