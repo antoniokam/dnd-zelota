@@ -53,12 +53,18 @@
   <header class="w-full max-w-[1050px] mb-2 flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-[#2d251e] text-[#f2ece2] rounded-lg shadow-lg border border-[#524538] no-print">
     <!-- Brand & Stato -->
     <div class="flex items-center gap-2.5">
-      <img src="./icon.svg" alt="D&D 5e" style="width: 32px; height: 32px; min-width: 32px; object-fit: contain; border-radius: 6px;" />
+      <img id="app-dice-logo" src="./icon.svg" alt="D&D 5e" style="width: 34px; height: 34px; min-width: 34px; object-fit: contain; border-radius: 6px;" class="cursor-pointer select-none hover:scale-105 transition" title="Tocca due volte per info autore" />
       <div>
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-dnd-heading text-base sm:text-lg text-amber-300">⚔️ D&amp;D 5e Zelota Companion</span>
-          <span id="app-version-badge" class="text-[9px] font-mono font-bold text-amber-200/90 bg-stone-900/70 px-1.5 py-0.5 rounded border border-amber-700/50" title="Versione Applicazione">v3.5</span>
+          <div class="flex items-center select-none">
+            <span id="title-dice-icon" class="cursor-pointer select-none text-base mr-1 hover:scale-110 transition" title="Tocca due volte per info autore">🎲</span>
+            <span class="font-dnd-heading text-base sm:text-lg text-amber-300">⚔️ D&amp;D 5e Zelota Companion</span>
+          </div>
           <span id="autosave-indicator" class="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-950/60 border border-emerald-700/60">✓ Salvataggio Attivo</span>
+        </div>
+        <!-- Easter Egg: Sviluppato da Antonio Canonico -->
+        <div id="author-credits-badge" class="hidden text-xs font-bold text-amber-300 bg-amber-950/95 border border-amber-500/80 px-2.5 py-0.5 rounded-md shadow-lg flex items-center gap-1.5 mt-1 select-none animate-pulse w-fit">
+          <span>✨ Sviluppato da Antonio Canonico ✨</span>
         </div>
       </div>
     </div>
@@ -70,6 +76,7 @@
         <span>⚡ Aggiorna App</span>
         <span class="bg-stone-950 text-amber-300 text-[9px] px-1 py-0.2 rounded font-mono font-bold">v3.5</span>
       </button>
+      <span id="mobile-version-badge" class="action-btn text-xs font-mono font-bold bg-[#1a140f] text-amber-300 border border-amber-600/70 py-1 px-2.5 rounded shadow-sm select-none" title="Versione Applicazione">v3.5</span>
       <button id="btn-toggle-eink" class="action-btn text-xs font-bold" title="Passa alla modalità ad alto contrasto per Onyx Boox">
         ⚪ Modo BOOX E-Ink
       </button>

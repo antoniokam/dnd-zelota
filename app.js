@@ -137,6 +137,7 @@ const App = {
 
   init() {
     this.initTheme();
+    this.initEasterEgg();
     this.initViews();
     this.initSheetController();
     this.initWizard();
@@ -1850,6 +1851,8 @@ const App = {
 
     const versionBadge = document.getElementById("app-version-badge");
     if (versionBadge) versionBadge.textContent = this.currentAppVersion;
+    const mobileVersionBadge = document.getElementById("mobile-version-badge");
+    if (mobileVersionBadge) mobileVersionBadge.textContent = this.currentAppVersion;
 
     const btnHeaderUpdate = document.getElementById("btn-header-update");
     if (btnHeaderUpdate) {
