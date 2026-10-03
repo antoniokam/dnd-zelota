@@ -1,0 +1,378 @@
+/* ==========================================================================
+   D&D 5E COMPANION & CHARACTER BUILDER - PROFESSIONAL CORE CSS
+   Compatibile con Tailwind, Mobile First, Tablet ed E-Ink Boox
+   ========================================================================== */
+
+/* Font D&D con fallback eleganti di sistema se offline */
+.font-dnd-title {
+  font-family: 'Cinzel', 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+}
+
+.font-dnd-heading {
+  font-family: 'Cinzel Decorative', 'Cinzel', Georgia, serif;
+}
+
+/* Sfondo Applicazione Classico */
+body {
+  background-color: #241f1a;
+  background-image: radial-gradient(#382f27 1px, transparent 1px), radial-gradient(#312921 1px, #1c1814 100%);
+  background-size: 24px 24px;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e1915;
+}
+
+/* Foglio stile pergamena D&D */
+.parchment {
+  background: #fbf7ee;
+  background-image: 
+    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.75) 0%, rgba(240, 232, 218, 0.5) 100%),
+    repeating-linear-gradient(0deg, rgba(200, 180, 150, 0.03) 0px, rgba(200, 180, 150, 0.03) 1px, transparent 1px, transparent 4px);
+  box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(120, 95, 60, 0.4);
+}
+
+/* Riquadri con contorni D&D standard */
+.dnd-box {
+  border: 1.5px solid #4a3e35;
+  border-radius: 8px;
+  background: rgba(255, 253, 248, 0.88);
+  position: relative;
+}
+
+.dnd-box-subtle {
+  border: 1px solid #7c6d61;
+  border-radius: 6px;
+  background: #fdfaf3;
+}
+
+.dnd-label-banner {
+  font-family: 'Cinzel', 'Palatino Linotype', Georgia, serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  color: #3b3026;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Stat Box classico 5e */
+.stat-box {
+  width: 78px;
+  height: 100px;
+  border: 2px solid #3d3229;
+  border-radius: 12px;
+  background: #faf6ed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.stat-pill {
+  position: absolute;
+  bottom: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 25px;
+  border: 1.5px solid #3d3229;
+  border-radius: 14px;
+  background: #fbf7ee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* Checkbox circolare D&D */
+.dnd-circle-check {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #4a3e35;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fcfbf7;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.dnd-circle-check:checked {
+  background-color: #29221c;
+  box-shadow: inset 0 0 0 2.5px #faf6ee;
+}
+
+/* Campi input & textarea trasparenti */
+#sheet input[type="text"], 
+#sheet input[type="number"], 
+#sheet textarea, 
+#sheet select {
+  background: transparent;
+  outline: none;
+  color: #1a1614;
+  font-weight: 600;
+  transition: background-color 0.15s;
+}
+#sheet input[type="text"]:focus, 
+#sheet input[type="number"]:focus, 
+#sheet textarea:focus, 
+#sheet select:focus {
+  background: rgba(220, 205, 175, 0.25);
+  border-radius: 3px;
+}
+
+/* Pulsanti Azione Medievali */
+.action-btn {
+  background: #3c3229;
+  color: #f7f3ea;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #6b5847;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+.action-btn:hover {
+  background: #5a4b3d;
+  color: #ffffff;
+}
+.action-btn.active {
+  background: #c89332 !important;
+  color: #1a140c !important;
+  font-weight: 800;
+  border-color: #f3c267 !important;
+}
+
+/* Nav Tab (Pagine 1, 2, 3) */
+.nav-tab {
+  font-family: 'Cinzel', Georgia, serif;
+  transition: all 0.15s ease;
+  background: #3a3026;
+  color: #d6ccbe;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+.nav-tab.active {
+  background: #fbf7ee !important;
+  color: #312317 !important;
+  border-color: #7d654f !important;
+  border-bottom-color: #fbf7ee !important;
+}
+
+/* Controlli Rapidi Punti Ferita (HP) */
+.hp-btn {
+  width: 34px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid #5a4b3d;
+  background: #ecdac1;
+  font-weight: 800;
+  font-size: 0.75rem;
+  color: #3c3024;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hp-btn:active {
+  background: #c7b093;
+}
+
+/* ==========================================================================
+   MODALITÀ ONYX BOOX E-INK (Altissimo Contrasto B&N)
+   ========================================================================== */
+body.theme-eink {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #000000 !important;
+}
+
+body.theme-eink * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+body.theme-eink .parchment,
+body.theme-eink .dnd-box,
+body.theme-eink .dnd-box-subtle,
+body.theme-eink .stat-box,
+body.theme-eink header,
+body.theme-eink .bottom-nav {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+body.theme-eink .action-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  font-weight: 800 !important;
+}
+
+body.theme-eink .action-btn.active {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+body.theme-eink .dnd-circle-check {
+  border-color: #000000 !important;
+  background: #ffffff !important;
+}
+body.theme-eink .dnd-circle-check:checked {
+  background-color: #000000 !important;
+  box-shadow: none !important;
+}
+
+body.theme-eink input,
+body.theme-eink textarea,
+body.theme-eink select {
+  color: #000000 !important;
+}
+
+/* ==========================================================================
+   WIZARD CREAZIONE PERSONAGGIO
+   ========================================================================== */
+.wizard-step-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #352a21;
+  color: #cfbeab;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid #5a4b3d;
+}
+.wizard-step-badge.active {
+  background: #c89332;
+  color: #1a140c;
+  border-color: #e5b65e;
+}
+.wizard-step-badge.completed {
+  background: #4a5d3f;
+  color: #e2f0d9;
+}
+
+.wizard-card-select {
+  border: 1.5px solid #6b5847;
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.wizard-card-select:hover {
+  border-color: #c89332;
+  background: #ffffff;
+}
+.wizard-card-select.selected {
+  border: 2px solid #c89332;
+  background: #fffdf7;
+  box-shadow: 0 0 0 1px #c89332;
+}
+
+/* ==========================================================================
+   BARRA DI NAVIGAZIONE INFERIORE (MOBILE)
+   ========================================================================== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #231c16;
+  border-top: 1.5px solid #4a3e35;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 100;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #b0a08e;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: none;
+  border: none;
+  cursor: pointer;
+  height: 100%;
+  flex: 1;
+}
+.bottom-nav-item.active {
+  color: #ffc83b;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Padding di sicurezza per dispositivi mobili per evitare che la bottom-nav copra l'ultima riga */
+body {
+  padding-bottom: 120px !important;
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-bottom: 2.5rem !important;
+  }
+}
+
+.page-container {
+  padding-bottom: 30px;
+}
+
+.app-view {
+  padding-bottom: 40px;
+}
+
+/* Textarea fluide: nessun taglio di parole, altezza naturale per mostrare tutto il testo */
+textarea {
+  box-sizing: border-box !important;
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
+  line-height: 1.45 !important;
+  overflow-y: hidden;
+}
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+
+@media print {
+  body {
+    background: none !important;
+    padding: 0 !important;
+  }
+  .no-print, .bottom-nav {
+    display: none !important;
+  }
+  .parchment {
+    box-shadow: none !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    border: none !important;
+  }
+  .page-container {
+    display: block !important;
+    page-break-after: always;
+  }
+}

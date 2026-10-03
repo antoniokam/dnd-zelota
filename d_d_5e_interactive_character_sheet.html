@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scheda Personaggio D&D 5e - Ufficiale 3 Pagine Interattiva</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700&family=MedievalSharp&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      background-color: #241f1a;
+      background-image: radial-gradient(#382f27 1px, transparent 1px), radial-gradient(#312921 1px, #1c1814 100%);
+      background-size: 24px 24px;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #1e1915;
+    }
+
+    .font-dnd-title {
+      font-family: 'Cinzel', serif;
+    }
+
+    .font-dnd-heading {
+      font-family: 'Cinzel Decorative', cursive, serif;
+    }
+
+    /* Foglio stile pergamena D&D */
+    .parchment {
+      background: #fbf7ee;
+      background-image: 
+        radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.75) 0%, rgba(240, 232, 218, 0.5) 100%),
+        repeating-linear-gradient(0deg, rgba(200, 180, 150, 0.03) 0px, rgba(200, 180, 150, 0.03) 1px, transparent 1px, transparent 4px);
+      box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(120, 95, 60, 0.4);
+    }
+
+    /* Riquadri con contorni D&D standard */
+    .dnd-box {
+      border: 1.5px solid #4a3e35;
+      border-radius: 8px;
+      background: rgba(255, 253, 248, 0.88);
+      position: relative;
+    }
+
+    .dnd-box-subtle {
+      border: 1px solid #7c6d61;
+      border-radius: 6px;
+      background: #fdfaf3;
+    }
+
+    .dnd-label-banner {
+      font-family: 'Cinzel', serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #3b3026;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* Stat Box classico 5e */
+    .stat-box {
+      width: 78px;
+      height: 100px;
+      border: 2px solid #3d3229;
+      border-radius: 12px;
+      background: #faf6ed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    .stat-pill {
+      position: absolute;
+      bottom: -11px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 44px;
+      height: 25px;
+      border: 1.5px solid #3d3229;
+      border-radius: 14px;
+      background: #fbf7ee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+    }
+
+    /* Checkbox circolare D&D */
+    .dnd-circle-check {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid #4a3e35;
+      border-radius: 50%;
+      outline: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fcfbf7;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .dnd-circle-check:checked {
+      background-color: #29221c;
+      box-shadow: inset 0 0 0 2.5px #faf6ee;
+    }
+
+    /* Campi input trasparenti */
+    input[type="text"], input[type="number"], textarea, select {
+      background: transparent;
+      outline: none;
+      color: #1a1614;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
+      background: rgba(220, 205, 175, 0.25);
+      border-radius: 3px;
+    }
+
+    .action-btn {
+      background: #3c3229;
+      color: #f7f3ea;
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    .action-btn:hover {
+      background: #5a4b3d;
+      color: #fff;
+    }
+
+    .nav-tab {
+      font-family: 'Cinzel', serif;
+      transition: all 0.15s ease;
+    }
+    .nav-tab.active {
+      background: #fbf7ee;
+      color: #312317;
+      border-color: #7d654f;
+      border-bottom-color: #fbf7ee;
+    }
+
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .parchment {
+        box-shadow: none;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 8px !important;
+        border: none;
+      }
+      .page-container {
+        display: block !important;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body class="p-2 sm:p-4 md:p-6 lg:p-8 flex flex-col items-center">
+
+  <!-- BARRA DI CONTROLLO PRINCIPALE (no-print) -->
+  <header class="w-full max-w-[1050px] mb-3 flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-[#2d251e] text-[#f2ece2] rounded-lg shadow-lg border border-[#524538] no-print">
+    <div class="flex items-center gap-3">
+      <span class="font-dnd-heading text-lg text-amber-300">⚔️ D&amp;D 5e</span>
+      <span class="text-xs uppercase tracking-wider font-semibold text-stone-300 hidden md:inline">Scheda Ufficiale 3 Pagine Completa &bull; MVVM</span>
+    </div>
+    
+    <div class="flex items-center flex-wrap gap-2">
+      <button id="btn-rage-toggle" class="action-btn px-2.5 py-1.5 rounded border border-amber-600/70 bg-amber-950/80 hover:bg-amber-900 text-amber-200 text-xs font-bold transition">
+        🔥 Attiva Ira Zelota (+2 Dmg)
+      </button>
+      <button id="btn-export-json" class="action-btn px-2.5 py-1.5 rounded border border-[#6b5847] hover:bg-[#4a3e34] text-xs" title="Esporta Scheda in file JSON">
+        💾 Salva JSON
+      </button>
+      <label class="action-btn px-2.5 py-1.5 rounded border border-[#6b5847] hover:bg-[#4a3e34] text-xs cursor-pointer" title="Carica Scheda da file JSON">
+        📂 Carica JSON
+        <input type="file" id="file-import-json" accept=".json" class="hidden">
+      </label>
+      <button onclick="window.print()" class="action-btn px-2.5 py-1.5 rounded border border-[#6b5847] bg-stone-700 hover:bg-stone-600 text-xs flex items-center gap-1">
+        🖨️ Stampa
+      </button>
+      <button id="btn-reset" class="action-btn px-2 py-1.5 rounded border border-red-900/60 bg-red-950/40 hover:bg-red-900 text-red-200 text-xs" title="Ripristina valori originali di Kaelen">
+        ↺ Reset
+      </button>
+    </div>
+  </header>
+
+  <!-- SELECTOR DELLE 3 PAGINE UFFICIALI (no-print) -->
+  <div class="w-full max-w-[1050px] flex gap-1 mb-0 border-b-2 border-[#5d4c3f] px-2 no-print">
+    <button id="tab-btn-1" class="nav-tab active px-4 py-2 text-xs md:text-sm font-bold rounded-t-lg border-t-2 border-l-2 border-r-2 border-[#5d4c3f] bg-[#3a3026] text-stone-300">
+      Pagina 1: Scheda Combattimento
+    </button>
+    <button id="tab-btn-2" class="nav-tab px-4 py-2 text-xs md:text-sm font-bold rounded-t-lg border-t-2 border-l-2 border-r-2 border-[#5d4c3f] bg-[#3a3026] text-stone-300">
+      Pagina 2: Aspetto, Ritratto &amp; Note
+    </button>
+    <button id="tab-btn-3" class="nav-tab px-4 py-2 text-xs md:text-sm font-bold rounded-t-lg border-t-2 border-l-2 border-r-2 border-[#5d4c3f] bg-[#3a3026] text-stone-300">
+      Pagina 3: Poteri Zelota &amp; Riti Celesti
+    </button>
+  </div>
+
+  <!-- CONTENITORE PRINCIPALE SCHEDA -->
+  <main id="sheet" class="parchment w-full max-w-[1050px] rounded-b-xl rounded-tr-xl p-4 sm:p-6 md:p-8 border border-[#5d4c3f] shadow-2xl relative">
+    
+    <!-- ========================================================================= -->
+    <!-- PAGINA 1: SCHEDA PERSONAGGIO PRINCIPALE (COMBATTIMENTO, CARATTERISTICHE) -->
+    <!-- ========================================================================= -->
+    <div id="page-1" class="page-container block">
+      
+      <!-- INTESTAZIONE SCHEDA UFFICIALE (Header 3 blocchi D&D) -->
+      <section class="grid grid-cols-1 md:grid-cols-12 gap-3 pb-4 border-b-2 border-[#45372d] mb-5 items-stretch">
+        <div class="md:col-span-5 flex flex-col justify-end p-2 dnd-box bg-[#f8f3e8]/70">
+          <div class="flex items-center justify-between mb-1">
+            <h1 class="font-dnd-title font-black text-xl tracking-tight text-[#2b211a]">DUNGEONS &amp; DRAGONS<sup>®</sup></h1>
+            <span class="text-[10px] font-bold text-stone-500 tracking-wider">5ª EDIZIONE (ITA)</span>
+          </div>
+          <div class="mt-auto">
+            <input type="text" id="characterName" class="w-full text-2xl font-bold font-dnd-title border-b border-[#5e4f42] px-1 py-0.5 text-[#241a14]" value="Kaelen 'Stigmata' Vane" />
+            <div class="dnd-label-banner text-left mt-0.5 text-[9px] text-[#6b5848]">Nome del Personaggio</div>
+          </div>
+        </div>
+
+        <div class="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-2 p-2.5 dnd-box bg-[#f8f3e8]/70">
+          <div class="border-b border-[#5e4f42] pb-0.5">
+            <input type="text" id="classLevel" class="w-full text-xs font-semibold" value="Barbaro (Zelota) 6" />
+            <div class="dnd-label-banner text-left text-[8px]">Classe e Livello</div>
+          </div>
+          <div class="border-b border-[#5e4f42] pb-0.5">
+            <input type="text" id="background" class="w-full text-xs font-semibold" value="Eremita / Soldato" />
+            <div class="dnd-label-banner text-left text-[8px]">Sfondo / Background</div>
+          </div>
+          <div class="border-b border-[#5e4f42] pb-0.5">
+            <input type="text" id="playerName" class="w-full text-xs font-semibold" value="Giocatore" />
+            <div class="dnd-label-banner text-left text-[8px]">Nome del Giocatore</div>
+          </div>
+          <div class="border-b border-[#5e4f42] pb-0.5">
+            <input type="text" id="race" class="w-full text-xs font-semibold" value="Custom Lineage (Umano Marchiato)" />
+            <div class="dnd-label-banner text-left text-[8px]">Razza</div>
+          </div>
+          <div class="border-b border-[#5e4f42] pb-0.5">
+            <input type="text" id="alignment" class="w-full text-xs font-semibold" value="Caotico Buono" />
+            <div class="dnd-label-banner text-left text-[8px]">Allineamento</div>
+          </div>
+          <div class="border-b border-[#5e4f42] pb-0.5">
+            <input type="text" id="experiencePoints" class="w-full text-xs font-semibold" value="14.000 XP" />
+            <div class="dnd-label-banner text-left text-[8px]">Punti Esperienza</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CORPO PRINCIPALE IN 3 COLONNE D&D -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        <!-- COLONNA 1: CARATTERISTICHE, TIRI SALVEZZA, ABILITÀ -->
+        <section class="lg:col-span-4 flex flex-col gap-4">
+          <div class="grid grid-cols-12 gap-3">
+            
+            <!-- 6 Stat Box a Sinistra -->
+            <div class="col-span-4 sm:col-span-3 lg:col-span-4 flex flex-col gap-3.5 items-center">
+              <div class="stat-box">
+                <span class="dnd-label-banner text-[9px] mt-1.5">Forza</span>
+                <div id="str-mod" class="text-2xl font-bold font-dnd-title my-auto text-[#201813]">+3</div>
+                <div class="stat-pill">
+                  <input type="number" id="stat-str" class="w-full text-center text-xs font-bold" value="17" min="1" max="30">
+                </div>
+              </div>
+
+              <div class="stat-box">
+                <span class="dnd-label-banner text-[9px] mt-1.5">Destrezza</span>
+                <div id="dex-mod" class="text-2xl font-bold font-dnd-title my-auto text-[#201813]">+2</div>
+                <div class="stat-pill">
+                  <input type="number" id="stat-dex" class="w-full text-center text-xs font-bold" value="14" min="1" max="30">
+                </div>
+              </div>
+
+              <div class="stat-box">
+                <span class="dnd-label-banner text-[9px] mt-1.5">Costituzione</span>
+                <div id="con-mod" class="text-2xl font-bold font-dnd-title my-auto text-[#201813]">+2</div>
+                <div class="stat-pill">
+                  <input type="number" id="stat-con" class="w-full text-center text-xs font-bold" value="14" min="1" max="30">
+                </div>
+              </div>
+
+              <div class="stat-box">
+                <span class="dnd-label-banner text-[9px] mt-1.5">Intelligenza</span>
+                <div id="int-mod" class="text-2xl font-bold font-dnd-title my-auto text-[#201813]">-1</div>
+                <div class="stat-pill">
+                  <input type="number" id="stat-int" class="w-full text-center text-xs font-bold" value="8" min="1" max="30">
+                </div>
+              </div>
+
+              <div class="stat-box">
+                <span class="dnd-label-banner text-[9px] mt-1.5">Saggezza</span>
+                <div id="wis-mod" class="text-2xl font-bold font-dnd-title my-auto text-[#201813]">+1</div>
+                <div class="stat-pill">
+                  <input type="number" id="stat-wis" class="w-full text-center text-xs font-bold" value="12" min="1" max="30">
+                </div>
+              </div>
+
+              <div class="stat-box">
+                <span class="dnd-label-banner text-[9px] mt-1.5">Carisma</span>
+                <div id="cha-mod" class="text-2xl font-bold font-dnd-title my-auto text-[#201813]">+0</div>
+                <div class="stat-pill">
+                  <input type="number" id="stat-cha" class="w-full text-center text-xs font-bold" value="10" min="1" max="30">
+                </div>
+              </div>
+            </div>
+
+            <!-- Ispirazione, Bonus Competenza, TS, Abilità -->
+            <div class="col-span-8 sm:col-span-9 lg:col-span-8 flex flex-col gap-3">
+              <div class="grid grid-cols-2 gap-2">
+                <div class="dnd-box p-1.5 flex flex-col items-center justify-center">
+                  <input type="checkbox" id="inspiration" class="dnd-circle-check w-5 h-5 mb-0.5">
+                  <span class="dnd-label-banner text-[8px]">Ispirazione</span>
+                </div>
+                <div class="dnd-box p-1.5 flex flex-col items-center justify-center">
+                  <div class="flex items-center">
+                    <span class="text-xs font-bold mr-0.5">+</span>
+                    <input type="number" id="proficiencyBonus" class="w-7 text-center font-bold text-base" value="3" min="1" max="9">
+                  </div>
+                  <span class="dnd-label-banner text-[8px]">Bonus Comp.</span>
+                </div>
+              </div>
+
+              <!-- Tiri Salvezza -->
+              <div class="dnd-box p-2.5">
+                <div class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-1.5 text-[9px]">Tiri Salvezza</div>
+                <div class="space-y-1 text-xs" id="saving-throws-list"></div>
+              </div>
+
+              <!-- Abilità -->
+              <div class="dnd-box p-2.5">
+                <div class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-1.5 text-[9px]">Abilità</div>
+                <div class="space-y-0.5 text-[11px]" id="skills-list"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Percezione Passiva -->
+          <div class="dnd-box p-2 flex items-center justify-between px-3">
+            <div class="flex items-center gap-2">
+              <div id="passive-perception-val" class="w-7 h-7 rounded border border-[#524437] bg-white flex items-center justify-center font-bold text-sm text-[#241a14]">
+                14
+              </div>
+              <span class="dnd-label-banner text-left text-[9px]">Saggezza Passiva (Percezione)</span>
+            </div>
+          </div>
+
+          <!-- Altre Competenze e Linguaggi -->
+          <div class="dnd-box p-3 flex flex-col min-h-[170px]">
+            <span class="dnd-label-banner text-left border-b border-[#9c8978] pb-1 mb-2">Altre Competenze &amp; Linguaggi</span>
+            <textarea id="otherProficiencies" class="w-full flex-grow text-xs leading-relaxed resize-none p-1" rows="6">- Armature: Armature Leggere, Armature Medie, Scudi.
+- Armi: Armi Semplici, Armi da Guerra.
+- Strumenti: Set da gioco (Dadi).
+- Linguaggi: Comune, Celestiale.
+- Tratto Razziale: Scurovisione 18 m (60 ft).</textarea>
+          </div>
+        </section>
+
+        <!-- COLONNA 2: COMBATTIMENTO, PF, ATTACCHI & ARMI -->
+        <section class="lg:col-span-5 flex flex-col gap-4">
+          <div class="grid grid-cols-3 gap-2">
+            <div class="dnd-box p-2 flex flex-col items-center justify-center text-center bg-[#fdfbf6]">
+              <span class="dnd-label-banner text-[8px] mb-1">Classe Armatura</span>
+              <input type="number" id="armorClass" class="w-12 text-center text-2xl font-bold font-dnd-title" value="17">
+              <span class="text-[9px] text-stone-500 font-medium">Mezza Armatura</span>
+            </div>
+
+            <div class="dnd-box p-2 flex flex-col items-center justify-center text-center bg-[#fdfbf6]">
+              <span class="dnd-label-banner text-[8px] mb-1">Iniziativa</span>
+              <div id="initiative-val" class="text-2xl font-bold font-dnd-title">+2</div>
+              <span class="text-[9px] text-stone-500 font-medium">(Mod. DES)</span>
+            </div>
+
+            <div class="dnd-box p-2 flex flex-col items-center justify-center text-center bg-[#fdfbf6]">
+              <span class="dnd-label-banner text-[8px] mb-1">Velocità</span>
+              <input type="text" id="speed" class="w-full text-center text-xl font-bold font-dnd-title" value="12 m">
+              <span class="text-[9px] text-stone-500 font-medium">40 ft (Fast Mvmt)</span>
+            </div>
+          </div>
+
+          <!-- Punti Ferita -->
+          <div class="dnd-box p-3">
+            <div class="flex justify-between items-center border-b border-[#a89686] pb-1 mb-2">
+              <span class="dnd-label-banner text-[9px]">Punti Ferita Massimi:</span>
+              <input type="number" id="maxHp" class="w-14 text-right font-bold text-sm" value="65">
+            </div>
+            
+            <div class="py-2 flex flex-col items-center">
+              <div class="dnd-label-banner text-[10px] mb-1">Punti Ferita Attuali</div>
+              <input type="number" id="currentHp" class="w-24 text-center text-3xl font-extrabold text-[#991b1b]" value="65">
+            </div>
+
+            <div class="pt-2 border-t border-[#a89686] flex items-center justify-between">
+              <span class="dnd-label-banner text-[8px]">PF Temporanei</span>
+              <input type="number" id="tempHp" class="w-16 text-center font-bold text-sm" value="0">
+            </div>
+          </div>
+
+          <!-- Dadi Vita e Death Saves -->
+          <div class="grid grid-cols-2 gap-2">
+            <div class="dnd-box p-2 flex flex-col justify-between">
+              <div class="flex justify-between text-[9px] border-b border-[#a89686] pb-0.5">
+                <span class="dnd-label-banner">Totale</span>
+                <span class="font-bold">6d12</span>
+              </div>
+              <div class="my-auto py-1 text-center">
+                <input type="text" id="hitDiceRemaining" class="w-full text-center font-bold text-lg" value="6d12">
+              </div>
+              <span class="dnd-label-banner text-[8px]">Dadi Vita</span>
+            </div>
+
+            <div class="dnd-box p-2 flex flex-col justify-between">
+              <div class="flex items-center justify-between text-[10px]">
+                <span class="text-[9px] font-bold uppercase text-emerald-800">Successi</span>
+                <div class="flex gap-1.5">
+                  <input type="checkbox" class="dnd-circle-check">
+                  <input type="checkbox" class="dnd-circle-check">
+                  <input type="checkbox" class="dnd-circle-check">
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-[10px] mt-1">
+                <span class="text-[9px] font-bold uppercase text-rose-800">Fallimenti</span>
+                <div class="flex gap-1.5">
+                  <input type="checkbox" class="dnd-circle-check">
+                  <input type="checkbox" class="dnd-circle-check">
+                  <input type="checkbox" class="dnd-circle-check">
+                </div>
+              </div>
+              <span class="dnd-label-banner text-[8px] mt-1 text-center">Tiri Salvezza Morte</span>
+            </div>
+          </div>
+
+          <!-- ATTACCHI & ARMI INTERATTIVI -->
+          <div class="dnd-box p-3">
+            <div class="flex justify-between items-center border-b border-[#8f7d6e] pb-1 mb-2">
+              <span class="dnd-label-banner text-[10px]">Attacchi &amp; Incantesimi</span>
+              <button id="btn-add-weapon" class="text-[10px] px-2 py-0.5 bg-[#42362b] text-amber-100 rounded hover:bg-[#57483a] no-print">
+                + Aggiungi Arma
+              </button>
+            </div>
+
+            <!-- ECONOMIA DELLE AZIONI AL LIVELLO 6 -->
+            <div class="grid grid-cols-3 gap-1.5 mb-2.5 p-1.5 bg-[#f5ecdc] rounded border border-[#c7b5a1] text-center">
+              <div class="flex flex-col items-center justify-center p-1 bg-white/80 rounded border border-[#ded0bf]">
+                <span class="text-[8px] uppercase tracking-wider font-bold text-stone-600">Azione Standard</span>
+                <span class="font-dnd-title font-black text-sm text-[#2b2017]">1 Azione</span>
+                <span class="text-[8px] font-bold text-[#7f1d1d] bg-amber-100 px-1 rounded mt-0.5">2 Attacchi (Extra Atk)</span>
+              </div>
+              <div class="flex flex-col items-center justify-center p-1 bg-white/80 rounded border border-[#ded0bf]">
+                <span class="text-[8px] uppercase tracking-wider font-bold text-stone-600">Azione Bonus</span>
+                <span class="font-dnd-title font-black text-sm text-[#2b2017]">1 / Turno</span>
+                <span class="text-[8px] font-medium text-stone-700 leading-tight">Ira / PAM 1d4 / GWM</span>
+              </div>
+              <div class="flex flex-col items-center justify-center p-1 bg-white/80 rounded border border-[#ded0bf]">
+                <span class="text-[8px] uppercase tracking-wider font-bold text-stone-600">Reazione</span>
+                <span class="font-dnd-title font-black text-sm text-[#2b2017]">1 / Round</span>
+                <span class="text-[8px] font-medium text-stone-700 leading-tight">AdO PAM (Ingresso 3m)</span>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="text-[8px] uppercase tracking-wider text-stone-600 border-b border-stone-300">
+                    <th class="py-1">Nome Arma</th>
+                    <th class="py-1 text-center">Stat</th>
+                    <th class="py-1 text-center">Comp</th>
+                    <th class="py-1 text-center">TxC</th>
+                    <th class="py-1">Danno / Tipo</th>
+                    <th class="py-1 text-center no-print"></th>
+                  </tr>
+                </thead>
+                <tbody id="weapons-tbody" class="divide-y divide-stone-200"></tbody>
+              </table>
+            </div>
+
+            <div class="mt-3 bg-[#f5ede0] p-2 rounded border border-[#c4b3a1] text-[11px] leading-tight text-stone-800">
+              <div class="font-bold text-[#631818] mb-1 uppercase tracking-wider text-[9px] flex items-center justify-between">
+                <span>Combo Tattiche e Privilegi Attivi</span>
+                <span id="rage-status-tag" class="px-1.5 py-0.5 bg-stone-300 text-stone-700 rounded text-[8px]">Ira: Inattiva</span>
+              </div>
+              <ul class="list-disc list-inside space-y-0.5 text-[10px]">
+                <li><strong>Reckless Attack:</strong> Vantaggio a tutti gli attacchi su FOR di questo turno.</li>
+                <li><strong>Great Weapon Master:</strong> -5 al TxC per <strong>+10 ai danni</strong> con armi pesanti.</li>
+                <li><strong>Furia Divina (Zelota):</strong> +1d6+3 danni Radiosi al 1° colpo andato a segno per turno.</li>
+                <li><strong>Polearm Master:</strong> Attacco bonus (1d4) con l'asta + Attacco d'opportunità quando entrano a 3m.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Equipaggiamento Rapido Pagina 1 -->
+          <div class="dnd-box p-3 flex flex-col flex-grow">
+            <div class="flex justify-between items-center border-b border-[#9c8978] pb-1 mb-2">
+              <span class="dnd-label-banner text-[9px]">Monete &amp; Equipaggiamento</span>
+              <div class="flex gap-2 text-[9px] font-bold">
+                <span>MR: <input type="number" id="coin-cp" class="w-6 text-center" value="0"></span>
+                <span>MA: <input type="number" id="coin-sp" class="w-6 text-center" value="12"></span>
+                <span>ME: <input type="number" id="coin-ep" class="w-6 text-center" value="0"></span>
+                <span>MO: <input type="number" id="coin-gp" class="w-8 text-center text-amber-700" value="85"></span>
+                <span>MP: <input type="number" id="coin-pp" class="w-6 text-center" value="0"></span>
+              </div>
+            </div>
+            <textarea id="equipmentList" class="w-full text-xs leading-relaxed resize-none p-1 flex-grow" rows="5">- Alabarda finemente cesellata (Pesante, Due Mani, Portata 3m)
+- Mezza Armatura (Half Plate, CA 15 + mod DES max 2 = 17)
+- 4x Giavellotti bilanciati da lancio (Gittata 9/36 m)
+- Zaino dell'esploratore, sacco a pelo, acciarino e pietra focaia
+- Amuleto con rune incandescenti scolpite (simbolo di Vaelkhor)
+- Pozione di Guarigione Superiore (4d4+4)</textarea>
+          </div>
+        </section>
+
+        <!-- COLONNA 3: ROLEPLAY, TRATTI & PRIVILEGI -->
+        <section class="lg:col-span-3 flex flex-col gap-3">
+          <div class="dnd-box p-2.5">
+            <span class="dnd-label-banner text-left block border-b border-[#a89686] pb-0.5 mb-1 text-[8px]">Tratti della Personalità</span>
+            <textarea id="personalityTraits" class="w-full text-xs leading-snug resize-none" rows="3">Parlo con franchezza brutale. Non ho rispetto per i titoli nobiliari o per chi si nasconde dietro un decreto per non fare la cosa giusta.</textarea>
+          </div>
+
+          <div class="dnd-box p-2.5">
+            <span class="dnd-label-banner text-left block border-b border-[#a89686] pb-0.5 mb-1 text-[8px]">Ideali (Caotico Buono)</span>
+            <textarea id="ideals" class="w-full text-xs leading-snug resize-none" rows="2">Rettitudine Indomita: Nessuna legge terrena o celeste ha valore se calpesta e schiaccia chi non può difendersi.</textarea>
+          </div>
+
+          <div class="dnd-box p-2.5">
+            <span class="dnd-label-banner text-left block border-b border-[#a89686] pb-0.5 mb-1 text-[8px]">Legami</span>
+            <textarea id="bonds" class="w-full text-xs leading-snug resize-none" rows="3">I superstiti del massacro di Oakhaven. Devolvo gran parte del mio bottino per sostenerli di nascosto.</textarea>
+          </div>
+
+          <div class="dnd-box p-2.5">
+            <span class="dnd-label-banner text-left block border-b border-[#a89686] pb-0.5 mb-1 text-[8px]">Difetti</span>
+            <textarea id="flaws" class="w-full text-xs leading-snug resize-none" rows="3">Furia intransigente: se vedo un abuso di potere tendo a impugnare l'arma prima ancora di aver tentato il dialogo.</textarea>
+          </div>
+
+          <div class="dnd-box p-3 flex flex-col flex-grow">
+            <span class="dnd-label-banner text-left block border-b border-[#a89686] pb-1 mb-2 text-[9px]">Caratteristiche &amp; Tratti Speciali</span>
+            <textarea id="featuresAndTraits" class="w-full text-[11px] leading-relaxed resize-none p-1 flex-grow" rows="14">★ PRIVILEGI BARBARO (Livello 6):
+- Ira (4/giorno): +2 ai danni arma FOR, Vantaggio su prove/TS Forza, Resistenza a danni contundenti, perforanti, taglienti.
+- Attacco Irresponsabile (Reckless Attack): Vantaggio a tutti gli attacchi su FOR del turno; nemici hanno Vantaggio su di te.
+- Senso del Pericolo (Danger Sense): Vantaggio sui TS Destrezza contro trappole ed effetti visibili.
+- Movimento Veloce: +3 metri di velocità quando non indossi armature pesanti.
+- Attacco Extra: 2 attacchi con l'azione Attacco.
+
+★ CAMMINO DELLO ZELOTA:
+- Furia Divina: 1° colpo per turno infligge +1d6+3 danni Radiosi.
+- Guerriero degli Dei: Resurrezioni (Revivify, ecc.) su di te NON consumano componenti materiali in diamanti!
+- Concentrazione Fanatica (Liv. 6): 1 volta per Ira, puoi ritirare un Tiro Salvezza fallito.
+
+★ TALENTI DI COMBATTIMENTO:
+- Polearm Master: Colpo d'estremità con Azione Bonus (1d4); Attacco d'opportunità quando i nemici ENTRANO a portata (3m).
+- Great Weapon Master: -5 al TxC per +10 danni; Attacco extra con Azione Bonus se metti a segno un Critico o abbatti un nemico.</textarea>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- PAGINA 2: ASPETTO FISICO, RITRATTO CON ALABARDA, ORGANIZZAZIONI & BACKSTORY -->
+    <!-- ========================================================================= -->
+    <div id="page-2" class="page-container hidden">
+      <div class="border-b-2 border-[#45372d] pb-2 mb-4 flex items-center justify-between">
+        <div>
+          <h2 class="font-dnd-title font-bold text-xl text-[#2b211a]">ASPETTO &amp; STORIA DEL PERSONAGGIO</h2>
+          <span class="text-[10px] uppercase tracking-wider text-stone-600">D&amp;D 5e - Scheda Ufficiale (Pagina 2)</span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-stone-800">Kaelen "Stigmata" Vane</span>
+        </div>
+      </div>
+
+      <!-- Dati Fisici Superiori (6 caselle classiche pagina 2) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 p-2.5 dnd-box bg-[#f8f3e8]/70 mb-4">
+        <div class="border-b border-[#5e4f42] pb-0.5">
+          <input type="text" id="bio-age" class="w-full text-xs font-semibold text-center" value="28 anni">
+          <div class="dnd-label-banner text-[8px]">Età</div>
+        </div>
+        <div class="border-b border-[#5e4f42] pb-0.5">
+          <input type="text" id="bio-height" class="w-full text-xs font-semibold text-center" value="1.88 m">
+          <div class="dnd-label-banner text-[8px]">Altezza</div>
+        </div>
+        <div class="border-b border-[#5e4f42] pb-0.5">
+          <input type="text" id="bio-weight" class="w-full text-xs font-semibold text-center" value="94 kg">
+          <div class="dnd-label-banner text-[8px]">Peso</div>
+        </div>
+        <div class="border-b border-[#5e4f42] pb-0.5">
+          <input type="text" id="bio-eyes" class="w-full text-xs font-semibold text-center" value="Oro incandescente">
+          <div class="dnd-label-banner text-[8px]">Occhi</div>
+        </div>
+        <div class="border-b border-[#5e4f42] pb-0.5">
+          <input type="text" id="bio-skin" class="w-full text-xs font-semibold text-center" value="Rune dorate a fuoco">
+          <div class="dnd-label-banner text-[8px]">Carnagione</div>
+        </div>
+        <div class="border-b border-[#5e4f42] pb-0.5">
+          <input type="text" id="bio-hair" class="w-full text-xs font-semibold text-center" value="Castano bruciato">
+          <div class="dnd-label-banner text-[8px]">Capelli</div>
+        </div>
+      </div>
+
+      <!-- Griglia Aspetto, Ritratto & Background -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        <!-- Colonna Sinistra (Ritratto con Alabarda + Descrizione Visiva) -->
+        <div class="lg:col-span-5 flex flex-col gap-4">
+          
+          <!-- RITRATTO DEL PERSONAGGIO (Con Supporto Nativo GIF / Immagini & Alabarda) -->
+          <div class="dnd-box p-3 flex flex-col items-center">
+            <div class="w-full flex items-center justify-between mb-2">
+              <span class="dnd-label-banner text-[10px]">Aspetto del Personaggio / Ritratto</span>
+              <span class="text-[9px] text-amber-800 font-bold bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">
+                Supporto GIF &amp; Animazioni
+              </span>
+            </div>
+            
+            <div id="portrait-frame" class="relative w-full max-w-[340px] aspect-[3/4] rounded-lg overflow-hidden border-2 border-[#524437] shadow-inner bg-[#1a1410] flex items-center justify-center group">
+              <!-- Elemento Immagine/GIF nativo: non altera i frame e riproduce il loop animato -->
+              <img id="character-portrait" 
+                   src="" 
+                   alt="Ritratto di Kaelen Vane" 
+                   class="w-full h-full object-cover hidden transition-all duration-300">
+
+              <!-- Illustrazione SVG Fantasy di Fallback (visualizzata se non c'è una GIF/immagine caricata) -->
+              <svg id="character-svg-portrait" viewBox="0 0 400 520" class="w-full h-full object-cover">
+                <defs>
+                  <radialGradient id="bgGlow" cx="50%" cy="40%" r="65%">
+                    <stop offset="0%" stop-color="#4a3b2c"/>
+                    <stop offset="60%" stop-color="#241b14"/>
+                    <stop offset="100%" stop-color="#140f0b"/>
+                  </radialGradient>
+                  <radialGradient id="celestialRage" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#fef08a" stop-opacity="0.9"/>
+                    <stop offset="45%" stop-color="#f59e0b" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
+                  </radialGradient>
+                  <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f8fafc"/>
+                    <stop offset="50%" stop-color="#94a3b8"/>
+                    <stop offset="100%" stop-color="#475569"/>
+                  </linearGradient>
+                  <linearGradient id="armorSteel" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#334155"/>
+                    <stop offset="50%" stop-color="#64748b"/>
+                    <stop offset="100%" stop-color="#1e293b"/>
+                  </linearGradient>
+                </defs>
+                <rect width="400" height="520" fill="url(#bgGlow)"/>
+                <circle cx="200" cy="190" r="140" fill="url(#celestialRage)"/>
+                <g stroke="#fbbf24" stroke-opacity="0.3" stroke-width="1.5">
+                  <line x1="200" y1="190" x2="80" y2="40"/>
+                  <line x1="200" y1="190" x2="320" y2="40"/>
+                  <line x1="200" y1="190" x2="30" y2="190"/>
+                  <line x1="200" y1="190" x2="370" y2="190"/>
+                  <line x1="200" y1="190" x2="100" y2="340"/>
+                  <line x1="200" y1="190" x2="300" y2="340"/>
+                </g>
+                <path d="M120 230 C80 340 70 460 90 520 L310 520 C330 460 320 340 280 230 Z" fill="#451a1a" opacity="0.85"/>
+                <path d="M110 230 C110 190 140 180 170 190 L160 270 C130 270 110 260 110 230 Z" fill="url(#armorSteel)" stroke="#0f172a" stroke-width="2"/>
+                <path d="M290 230 C290 190 260 180 230 190 L240 270 C270 270 290 260 290 230 Z" fill="url(#armorSteel)" stroke="#0f172a" stroke-width="2"/>
+                <path d="M150 190 L250 190 L240 330 L160 330 Z" fill="url(#armorSteel)" stroke="#0f172a" stroke-width="2"/>
+                <path d="M190 210 L210 210 M200 200 L200 240 M185 230 L215 230" stroke="#fef08a" stroke-width="2" stroke-linecap="round"/>
+                <path d="M180 160 L220 160 L215 200 L185 200 Z" fill="#d4a373"/>
+                <path d="M175 110 C175 80 225 80 225 110 C225 150 210 170 200 175 C190 170 175 150 175 110 Z" fill="#e29578"/>
+                <path d="M170 100 C175 60 225 60 230 100 C220 85 210 85 200 85 C190 85 180 90 170 100 Z" fill="#2d1e18"/>
+                <ellipse cx="190" cy="115" rx="3.5" ry="2" fill="#fef08a"/>
+                <ellipse cx="210" cy="115" rx="3.5" ry="2" fill="#fef08a"/>
+                <path d="M185 105 L189 125 L187 135" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round"/>
+                <path d="M125 240 L85 310 L105 325 L145 260 Z" fill="#d4a373"/>
+                <path d="M90 295 L115 285 M95 310 L125 295" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round"/>
+                <rect x="75" y="305" width="28" height="28" rx="4" fill="#334155" stroke="#0f172a" stroke-width="1.5"/>
+                <path d="M275 240 L310 320 L290 335 L255 260 Z" fill="#d4a373"/>
+                <rect x="295" y="315" width="28" height="28" rx="4" fill="#334155" stroke="#0f172a" stroke-width="1.5"/>
+                <line x1="30" y1="490" x2="350" y2="40" stroke="#451a03" stroke-width="7" stroke-linecap="round"/>
+                <line x1="30" y1="490" x2="350" y2="40" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+                <g transform="translate(310, 85) rotate(-38)">
+                  <rect x="-10" y="-8" width="20" height="22" rx="3" fill="#d97706" stroke="#78350f" stroke-width="1.5"/>
+                  <path d="M-5 -8 L0 -85 L5 -8 Z" fill="url(#bladeGrad)" stroke="#1e293b" stroke-width="1.5"/>
+                  <path d="M5 -15 C45 -35 70 -5 55 25 C40 38 10 15 5 0 Z" fill="url(#bladeGrad)" stroke="#1e293b" stroke-width="1.8"/>
+                  <path d="M-5 -10 C-30 -12 -38 5 -30 18 L-8 6 Z" fill="url(#bladeGrad)" stroke="#1e293b" stroke-width="1.5"/>
+                </g>
+              </svg>
+
+              <!-- Barra comandi caricamento foto / GIF animata -->
+              <div class="absolute bottom-2 inset-x-2 flex items-center justify-between gap-1 no-print">
+                <label class="flex-1 text-center py-1.5 px-2 bg-stone-900/90 hover:bg-stone-950 text-amber-200 text-[11px] font-bold rounded cursor-pointer border border-amber-600/50 shadow-md backdrop-blur-sm transition">
+                  🎞️ Carica GIF o Foto
+                  <input type="file" id="portrait-file-input" accept="image/gif, image/png, image/jpeg, image/webp" class="hidden">
+                </label>
+                <button type="button" id="btn-remove-portrait" class="hidden px-2 py-1.5 bg-red-950/80 hover:bg-red-900 text-red-200 text-[11px] font-bold rounded border border-red-700/50 shadow-md" title="Rimuovi immagine personalizzata">
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <p class="text-[9px] text-stone-600 mt-2 text-center italic">
+              Puoi caricare file <strong>.GIF animati</strong>, PNG o JPG. L'immagine rimarrà animata e verrà salvata con il file JSON.
+            </p>
+          </div>
+
+          <!-- Descrizione Dettagliata dell'Aspetto -->
+          <div class="dnd-box p-3 flex flex-col flex-grow">
+            <span class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-2 text-[9px]">Dettagli Visivi &amp; Marchio</span>
+            <textarea id="bio-appearance" class="w-full text-xs leading-relaxed resize-none p-1 flex-grow" rows="6">Alto, muscoloso e con il portamento rigido di chi ha vissuto in caserma. Sulla pelle ambrata porta lunghe cicatrici che invece di chiudersi normalmente brillano come braci dorate: sono le Stigmate di Vaelkhor, incise sul petto, braccia e colonna vertebrale.
+
+I suoi occhi hanno perso le pupille nere terrene: quando è calmo hanno il riflesso dell'oro fuso; quando entra in Ira ardono come torce celestiali. Impugna un'alabarda da fanti lunga oltre due metri e mezzo, provvista di punte ricurve e rune solari consacrate.</textarea>
+          </div>
+        </div>
+
+        <!-- Colonna Destra (Background Esteso, Alleati & Tesoro) -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+          
+          <!-- Backstory del Personaggio (Ufficiale Pagina 2) -->
+          <div class="dnd-box p-3 flex flex-col">
+            <span class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-2 text-[9px]">Storia del Personaggio (Backstory)</span>
+            <textarea id="bio-backstory" class="w-full text-xs leading-relaxed resize-none p-1" rows="12">Ex sergente mercenario lungo le marche di confine. Durante l'invasione di Oakhaven si rifiutò di eseguire l'ordine di ritirata strategica che condannava a morte centinaia di contadini e minatori. Spezzò le insegne del battaglione e si frappose da solo contro una congrega eretica devota agli Abissi.
+
+Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, venne raggiunto dalla presenza primordiale di Vaelkhor, la Fiamma Incorrotta: un arcangelo rinnegato che disprezza i compromessi e l'indifferenza delle gerarchie legali.
+
+Fuso col fuoco divino, Kaelen si rialzò e polverizzò il circolo blasfemo. Da allora vaga come un flagello per oppressori e tiranni: non segue liturgie né accetta l'autorità di re o concili se questi calpestano gli indifesi. Considera la propria vita come un prestito sacro da spendere senza esitazione in prima linea.</textarea>
+          </div>
+
+          <!-- Alleati e Organizzazioni -->
+          <div class="dnd-box p-3 flex flex-col">
+            <div class="flex justify-between items-center border-b border-[#a89686] pb-1 mb-2">
+              <span class="dnd-label-banner text-[9px]">Alleati &amp; Organizzazioni</span>
+              <input type="text" id="bio-faction-name" class="text-right text-xs font-bold w-48" value="I Superstiti di Oakhaven">
+            </div>
+            <textarea id="bio-allies" class="w-full text-xs leading-relaxed resize-none p-1" rows="4">- Vaelkhor, il Falciatore di Gioghi: Entità planare che gli concede la furia zelota e la rinascita senza costo.
+- Rete clandestina dei minatori di Oakhaven: Piccola diaspora di profughi che Kaelen protegge e finanzia segretamente.
+- Nemici Giurati: L'Alto Tribunale Inquisitorio (che lo considera un eretico da imprigionare) e i resti della Congrega Abissale.</textarea>
+          </div>
+
+          <!-- Tesoro e Oggetti di Valore (Ufficiale Pagina 2) -->
+          <div class="dnd-box p-3 flex flex-col flex-grow">
+            <span class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-2 text-[9px]">Tesoro &amp; Cimeli Aggiuntivi</span>
+            <textarea id="bio-treasure" class="w-full text-xs leading-relaxed resize-none p-1 flex-grow" rows="5">- Amuleto di Vaelkhor scolpito in metallo meteorico (ancorato a una catena spezzata).
+- Lettera di ringraziamento macchiata di fuliggine firmata dai bambini orfani di Oakhaven.
+- Pietra da affilare di quarzo benedetto.
+- Sacchetto di velluto con 85 Monete d'Oro imperiali e 12 Monete d'Argento di conio antico.</textarea>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- PAGINA 3: SCHEDA INCANTESIMI & GRIMORIO COMPLETA (PER PALADINI/MAGHI/BARBARO) -->
+    <!-- ========================================================================= -->
+    <div id="page-3" class="page-container hidden">
+      <div class="border-b-2 border-[#45372d] pb-2 mb-4 flex items-center justify-between">
+        <div>
+          <h2 class="font-dnd-title font-bold text-xl text-[#2b211a]">POTERI DIVINI, MANOVRE TATTICHE &amp; RITI DELLO ZELOTA</h2>
+          <span class="text-[10px] uppercase tracking-wider text-stone-600">D&amp;D 5e - Compendio Meccanico Ufficiale del Personaggio (Livello 6) &bull; Modificabile</span>
+        </div>
+        <div class="text-right flex items-center gap-2">
+          <span class="text-xs text-stone-800 font-bold bg-[#efe5d3] px-2.5 py-1 rounded border border-[#ab9582]">
+            Classe: <strong class="text-[#7f1d1d]">Barbaro Zelota 6</strong> &bull; Slot Incantesimo: <strong class="text-stone-600">0 (Nessuno)</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Pannello Risorse Giornaliere & Stato Attivo (Tracciatore Interattivo) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 dnd-box bg-[#f8f3e8]/85 mb-4">
+        <div class="border-b md:border-b-0 md:border-r border-[#8f7d6e] px-2 py-1 flex flex-col items-center justify-center">
+          <span class="dnd-label-banner text-[9px] mb-1">Usi Giornalieri di Ira (4/Giorno)</span>
+          <div class="flex items-center gap-2 mt-1">
+            <label class="flex items-center gap-1 text-[11px] font-bold cursor-pointer">
+              <input type="checkbox" id="rage-slot-1" class="dnd-circle-check"> 1ª
+            </label>
+            <label class="flex items-center gap-1 text-[11px] font-bold cursor-pointer">
+              <input type="checkbox" id="rage-slot-2" class="dnd-circle-check"> 2ª
+            </label>
+            <label class="flex items-center gap-1 text-[11px] font-bold cursor-pointer">
+              <input type="checkbox" id="rage-slot-3" class="dnd-circle-check"> 3ª
+            </label>
+            <label class="flex items-center gap-1 text-[11px] font-bold cursor-pointer">
+              <input type="checkbox" id="rage-slot-4" class="dnd-circle-check"> 4ª
+            </label>
+          </div>
+          <span class="text-[9px] text-stone-500 mt-1">Si ricaricano dopo un Riposo Lungo</span>
+        </div>
+
+        <div class="border-b md:border-b-0 md:border-r border-[#8f7d6e] px-2 py-1 flex flex-col items-center justify-center text-center">
+          <span class="dnd-label-banner text-[9px] mb-1">Concentrazione Fanatica (Liv. 6)</span>
+          <label class="flex items-center gap-1.5 text-xs font-bold text-[#7f1d1d] cursor-pointer mt-1">
+            <input type="checkbox" id="fanatical-focus-check" class="dnd-circle-check"> Ritiro Salvezza Disponibile
+          </label>
+          <span class="text-[9px] text-stone-500 mt-0.5">1 volta per ogni Ira attiva</span>
+        </div>
+
+        <div class="px-2 py-1 flex flex-col items-center justify-center text-center">
+          <span class="dnd-label-banner text-[9px] mb-0.5">Bonus Danno Furia Zelota</span>
+          <input type="text" id="divine-fury-display" class="text-xl font-extrabold font-dnd-title text-[#7f1d1d] text-center w-full" value="+1d6 + 3 Radiosi">
+          <span class="text-[9px] text-stone-600 font-semibold">(1° colpo a segno / turno)</span>
+        </div>
+      </div>
+
+      <!-- Griglia Dettagliata delle Sole Abilità e Manovre Usabili (TUTTO MODIFICABILE) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- COLONNA 1: PRIVILEGI SACRI DELLO ZELOTA (XGtE) -->
+        <div class="space-y-4">
+          <div class="dnd-box p-3 bg-[#fdfaf3] flex flex-col">
+            <div class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-2.5 text-[9px] text-amber-950 font-bold flex justify-between items-center">
+              <span>★ POTERI SACRI DELLO ZELOTA</span>
+              <span class="text-amber-800 text-[8px] uppercase">XGtE p. 9</span>
+            </div>
+
+            <div class="space-y-3 flex-grow flex flex-col">
+              <!-- Furia Divina -->
+              <div class="p-2.5 bg-amber-50/80 rounded border border-amber-300 text-[11px]">
+                <div class="flex items-center justify-between font-bold text-amber-950 border-b border-amber-200 pb-1 mb-1">
+                  <span>☀️ Furia Divina (Divine Fury)</span>
+                  <span class="text-[9px] px-1.5 py-0.5 bg-amber-200 text-amber-900 rounded font-bold">Innato</span>
+                </div>
+                <div class="grid grid-cols-2 text-[9px] text-amber-900 font-semibold mb-1">
+                  <span>⏱️ Innesco: 1° colpo a segno/turno</span>
+                  <span>🛡️ Nessun TS concesso</span>
+                </div>
+                <textarea id="p3-furia-divina" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="4">Quando colpisci con un attacco d'arma mentre sei in Ira, la lama dell'alabarda sprigiona fiamme sacre: infliggi 1d6 + 3 danni Radiosi extra al bersaglio. Non consuma slot o cariche.</textarea>
+              </div>
+
+              <!-- Guerriero degli Dei -->
+              <div class="p-2.5 bg-white rounded border border-[#d6c7b2] text-[11px]">
+                <div class="flex items-center justify-between font-bold text-[#342417] border-b border-stone-200 pb-1 mb-1">
+                  <span>✨ Guerriero degli Dei (Warrior of the Gods)</span>
+                  <span class="text-[9px] px-1.5 py-0.5 bg-yellow-100 text-yellow-900 rounded font-bold">Passivo</span>
+                </div>
+                <textarea id="p3-guerriero-dei" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="4">La tua anima appartiene a Vaelkhor. Se vieni ucciso, qualsiasi incantesimo volto a riportarti in vita (come Revivify, Raise Dead o Resurrection) NON consuma componenti materiali costose (risparmi i 300+ mo in diamanti!).</textarea>
+              </div>
+
+              <!-- Concentrazione Fanatica -->
+              <div class="p-2.5 bg-white rounded border border-[#d6c7b2] text-[11px]">
+                <div class="flex items-center justify-between font-bold text-[#342417] border-b border-stone-200 pb-1 mb-1">
+                  <span>🔥 Concentrazione Fanatica (Fanatical Focus)</span>
+                  <span class="text-[9px] px-1.5 py-0.5 bg-red-100 text-red-900 rounded font-bold">Livello 6</span>
+                </div>
+                <div class="text-[9px] text-stone-500 font-semibold mb-1">
+                  <span>⏱ 1 volta per ciascuna Ira</span>
+                </div>
+                <textarea id="p3-concentrazione-fanatica" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="3">Se fallisci un qualsiasi Tiro Salvezza mentre sei in Ira, puoi decidere immediatamente di ritirare il dado. Devi usare il nuovo risultato.</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLONNA 2: MANOVRE D'ARMI & TALENTI PAM / GWM -->
+        <div class="space-y-4">
+          <div class="dnd-box p-3 bg-[#fdfaf3] flex flex-col">
+            <div class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-2.5 text-[9px] text-stone-900 font-bold flex justify-between items-center">
+              <span>⚔️ TALENTI &amp; COMBATTIMENTO D'ASTA</span>
+              <span class="text-stone-600 text-[8px] uppercase">PHB Cap. 6</span>
+            </div>
+
+            <div class="space-y-3 flex-grow flex flex-col">
+              <!-- Polearm Master -->
+              <div class="p-2.5 bg-white rounded border border-[#d6c7b2] text-[11px]">
+                <div class="flex items-center justify-between font-bold text-[#342417] border-b border-stone-200 pb-1 mb-1">
+                  <span>🔱 Polearm Master (Azione Bonus &amp; Reazione)</span>
+                </div>
+                <textarea id="p3-polearm-master" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="5">• Colpo d'Estremità (Azione Bonus): quando attacchi solo con l'alabarda, usi l'Azione Bonus per colpire col pomo: 1d4 + 5 danni percussione (o 1d4+15 con GWM).
+• Attacco d'Opportunità d'Ingresso (Reazione): sferri un attacco d'opportunità quando una creatura entra nella tua portata di 3 metri (10 ft).</textarea>
+              </div>
+
+              <!-- Great Weapon Master -->
+              <div class="p-2.5 bg-white rounded border border-[#d6c7b2] text-[11px]">
+                <div class="flex items-center justify-between font-bold text-[#342417] border-b border-stone-200 pb-1 mb-1">
+                  <span>💥 Great Weapon Master (Colpo Devastante)</span>
+                </div>
+                <textarea id="p3-great-weapon-master" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="5">• Colpo Potente: prima di attaccare con l'alabarda, puoi scegliere di subire -5 al TxC per aggiungere +10 ai danni se colpisci.
+• Attacco Fendente Bonus: se metti a segno un Critico o abbatti un nemico a 0 PF, puoi compiere un attacco con arma da mischia come Azione Bonus.</textarea>
+              </div>
+
+              <!-- Attacco Irresponsabile -->
+              <div class="p-2.5 bg-white rounded border border-[#d6c7b2] text-[11px]">
+                <div class="flex items-center justify-between font-bold text-[#342417] border-b border-stone-200 pb-1 mb-1">
+                  <span>⚡ Attacco Irresponsabile (Reckless Attack)</span>
+                </div>
+                <textarea id="p3-reckless-attack" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="4">Al tuo 1° attacco del turno, puoi dichiarare Vantaggio su tutti i tiri per colpire in mischia su Forza per quel turno. I nemici hanno Vantaggio ad attaccare te fino al tuo turno successivo. (Annulla la penalità del -5 di GWM!).</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLONNA 3: PRIVILEGI BASE DEL BARBARO E TRATTI RAZZIALI -->
+        <div class="space-y-4">
+          <div class="dnd-box p-3 bg-[#fdfaf3] flex flex-col">
+            <div class="dnd-label-banner text-left border-b border-[#a89686] pb-1 mb-2.5 text-[9px] text-stone-900 font-bold">
+              🛡️ DIFESE, MOVIMENTO &amp; RETAGGIO
+            </div>
+
+            <div class="space-y-3 flex-grow flex flex-col">
+              <!-- Ira Barbarica -->
+              <div class="p-2.5 bg-[#fbf5eb] rounded border border-amber-700/40 text-[11px]">
+                <div class="font-bold text-[#631818] border-b border-amber-200 pb-1 mb-1 flex justify-between items-center">
+                  <span>🔥 Ira Barbarica (Regole Chiave)</span>
+                  <span class="text-[9px] text-stone-600">Dura 1 minuto</span>
+                </div>
+                <textarea id="p3-rage-rules" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="6">• Azione Bonus per attivarla (4 al giorno).
+• +2 ai danni con attacchi d'arma che usano Forza.
+• Vantaggio a prove di Forza e TS su Forza.
+• Resistenza a danni Contundenti, Perforanti e Taglienti (dimezza tutti i danni fisici).
+• Divieto: non puoi lanciare incantesimi né mantenere concentrazione.</textarea>
+              </div>
+
+              <!-- Senso del Pericolo & Movimento Veloce -->
+              <div class="p-2.5 bg-white rounded border border-[#d6c7b2] text-[11px]">
+                <div class="font-bold text-[#342417] border-b border-stone-200 pb-1 mb-1">
+                  🏃 Senso del Pericolo &amp; Movimento Veloce
+                </div>
+                <textarea id="p3-danger-movement" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="4">• Senso del Pericolo: Vantaggio ai TS Destrezza contro pericoli visibili (trappole, incantesimi ad area).
+• Movimento Veloce: +3 metri di velocità a piedi quando non indossi armature pesanti (totale: 12 m / 40 ft).</textarea>
+              </div>
+
+              <!-- Retaggio Celestiale -->
+              <div class="p-2.5 bg-white rounded border border-[#d6c7b2] text-[11px]">
+                <div class="font-bold text-[#342417] border-b border-stone-200 pb-1 mb-1">
+                  👁️ Scurovisione Marchiata (Custom Lineage)
+                </div>
+                <textarea id="p3-darkvision" class="w-full text-xs text-stone-800 leading-snug resize-y p-1 rounded bg-transparent" rows="3">I tuoi occhi emanano un bagliore d'oro incandescente: puoi vedere nella luce fioca come luce intensa, e nell'oscurità come luce fioca per 18 metri (60 ft).</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: ARCHITETTURA MVVM, REATTIVITÀ, GESTIONE PAGINE & IMPORT/EXPORT -->
+  <!-- ========================================================================= -->
+  <script>
+    const CharacterModel = {
+      data: {
+        identity: {
+          characterName: "Kaelen 'Stigmata' Vane",
+          classLevel: "Barbaro (Zelota) 6",
+          background: "Eremita / Soldato",
+          playerName: "Giocatore",
+          race: "Custom Lineage (Umano Marchiato)",
+          alignment: "Caotico Buono",
+          experiencePoints: "14.000 XP"
+        },
+        stats: {
+          str: 17,
+          dex: 14,
+          con: 14,
+          int: 8,
+          wis: 12,
+          cha: 10
+        },
+        proficiencyBonus: 3,
+        inspiration: false,
+        isRaging: false,
+        savingThrows: {
+          str: { name: "Forza", stat: "str", prof: true },
+          dex: { name: "Destrezza", stat: "dex", prof: false },
+          con: { name: "Costituzione", stat: "con", prof: true },
+          int: { name: "Intelligenza", stat: "int", prof: false },
+          wis: { name: "Saggezza", stat: "wis", prof: false },
+          cha: { name: "Carisma", stat: "cha", prof: false }
+        },
+        skills: {
+          acrobatics: { name: "Acrobazia", stat: "dex", prof: false },
+          animalHandling: { name: "Addestrare Animali", stat: "wis", prof: false },
+          arcana: { name: "Arcano", stat: "int", prof: false },
+          athletics: { name: "Atletica", stat: "str", prof: true },
+          deception: { name: "Inganno", stat: "cha", prof: false },
+          history: { name: "Storia", stat: "int", prof: false },
+          insight: { name: "Intuizione", stat: "wis", prof: false },
+          intimidation: { name: "Intimidire", stat: "cha", prof: true },
+          investigation: { name: "Indagare", stat: "int", prof: false },
+          medicine: { name: "Medicina", stat: "wis", prof: false },
+          nature: { name: "Natura", stat: "int", prof: false },
+          perception: { name: "Percezione", stat: "wis", prof: true },
+          performance: { name: "Intrattenere", stat: "cha", prof: false },
+          persuasion: { name: "Persuasione", stat: "cha", prof: false },
+          religion: { name: "Religione", stat: "int", prof: false },
+          sleightOfHand: { name: "Rapidità di Mano", stat: "dex", prof: false },
+          stealth: { name: "Furtività", stat: "dex", prof: false },
+          survival: { name: "Sopravvivenza", stat: "wis", prof: true }
+        },
+        weapons: [
+          {
+            id: "w1",
+            name: "Alabarda (Fendente)",
+            stat: "str",
+            prof: true,
+            dice: "1d10",
+            type: "Tagliente",
+            bonusDmg: 0
+          },
+          {
+            id: "w2",
+            name: "Alabarda (GWM Potente -5/+10)",
+            stat: "str",
+            prof: true,
+            dice: "1d10",
+            type: "Tagliente",
+            bonusDmg: 10,
+            specialAtkBonus: -5
+          },
+          {
+            id: "w3",
+            name: "PAM (Colpo d'Asta Bonus)",
+            stat: "str",
+            prof: true,
+            dice: "1d4",
+            type: "Contundente",
+            bonusDmg: 0
+          },
+          {
+            id: "w4",
+            name: "Giavellotto (Lancio 9/36m)",
+            stat: "str",
+            prof: true,
+            dice: "1d6",
+            type: "Perforante",
+            bonusDmg: 0
+          }
+        ],
+        portraitDataUrl: null
+      },
+
+      getModifier(score) {
+        return Math.floor((Number(score) - 10) / 2);
+      },
+
+      formatSigned(val) {
+        return val >= 0 ? `+${val}` : `${val}`;
+      }
+    };
+
+    const CharacterViewModel = {
+      model: CharacterModel,
+      activePage: 1,
+
+      init() {
+        this.loadStoredPortrait();
+        this.renderSavingThrows();
+        this.renderSkills();
+        this.renderWeapons();
+        this.bindEvents();
+        this.setupTabs();
+        this.setupPortraitManager();
+        this.updateAllCalculations();
+      },
+
+      getModFor(statKey) {
+        const val = this.model.data.stats[statKey] || 10;
+        return this.model.getModifier(val);
+      },
+
+      calcSave(statKey, isProf) {
+        const mod = this.getModFor(statKey);
+        const pb = Number(this.model.data.proficiencyBonus);
+        return mod + (isProf ? pb : 0);
+      },
+
+      calcSkill(statKey, isProf) {
+        const mod = this.getModFor(statKey);
+        const pb = Number(this.model.data.proficiencyBonus);
+        return mod + (isProf ? pb : 0);
+      },
+
+      calcPassivePerception() {
+        const isProf = this.model.data.skills.perception.prof;
+        return 10 + this.calcSkill('wis', isProf);
+      },
+
+      renderSavingThrows() {
+        const container = document.getElementById("saving-throws-list");
+        if (!container) return;
+        container.innerHTML = "";
+        
+        Object.entries(this.model.data.savingThrows).forEach(([key, st]) => {
+          const row = document.createElement("div");
+          row.className = "flex items-center justify-between py-0.5";
+          row.innerHTML = `
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="save-check-${key}" class="dnd-circle-check" ${st.prof ? 'checked' : ''}>
+              <label for="save-check-${key}" class="cursor-pointer select-none font-medium">${st.name}</label>
+            </div>
+            <span id="save-val-${key}" class="font-bold text-xs w-6 text-right">+0</span>
+          `;
+          container.appendChild(row);
+
+          row.querySelector(`#save-check-${key}`).addEventListener("change", (e) => {
+            this.model.data.savingThrows[key].prof = e.target.checked;
+            this.updateAllCalculations();
+          });
+        });
+      },
+
+      renderSkills() {
+        const container = document.getElementById("skills-list");
+        if (!container) return;
+        container.innerHTML = "";
+
+        Object.entries(this.model.data.skills).forEach(([key, sk]) => {
+          const statLabel = sk.stat.toUpperCase();
+          const row = document.createElement("div");
+          row.className = "flex items-center justify-between py-0.5 hover:bg-stone-100/50 rounded px-1";
+          row.innerHTML = `
+            <div class="flex items-center gap-2 overflow-hidden">
+              <input type="checkbox" id="skill-check-${key}" class="dnd-circle-check" ${sk.prof ? 'checked' : ''}>
+              <span class="truncate font-medium">${sk.name} <span class="text-[9px] text-stone-400 font-normal">(${statLabel})</span></span>
+            </div>
+            <span id="skill-val-${key}" class="font-bold text-xs w-6 text-right">+0</span>
+          `;
+          container.appendChild(row);
+
+          row.querySelector(`#skill-check-${key}`).addEventListener("change", (e) => {
+            this.model.data.skills[key].prof = e.target.checked;
+            this.updateAllCalculations();
+          });
+        });
+      },
+
+      renderWeapons() {
+        const tbody = document.getElementById("weapons-tbody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const rageBonus = this.model.data.isRaging ? 2 : 0;
+        const pb = Number(this.model.data.proficiencyBonus);
+
+        this.model.data.weapons.forEach((w, index) => {
+          const statMod = this.getModFor(w.stat);
+          const specialAtk = w.specialAtkBonus || 0;
+          const totalAtk = statMod + (w.prof ? pb : 0) + specialAtk;
+          
+          const baseDmgMod = statMod + rageBonus + (w.bonusDmg || 0);
+          const dmgString = `${w.dice} ${this.model.formatSigned(baseDmgMod)} ${w.type}`;
+
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-amber-50/50";
+          tr.innerHTML = `
+            <td class="py-1.5 font-semibold text-stone-900 pr-1">
+              <input type="text" class="w-full text-xs font-bold" value="${w.name}" data-weapon-idx="${index}" data-field="name">
+            </td>
+            <td class="py-1.5 text-center text-[10px] font-bold uppercase text-stone-600">
+              <select class="text-center font-bold" data-weapon-idx="${index}" data-field="stat">
+                <option value="str" ${w.stat === 'str' ? 'selected' : ''}>FOR</option>
+                <option value="dex" ${w.stat === 'dex' ? 'selected' : ''}>DES</option>
+              </select>
+            </td>
+            <td class="py-1.5 text-center">
+              <input type="checkbox" class="dnd-circle-check mx-auto" ${w.prof ? 'checked' : ''} data-weapon-idx="${index}" data-field="prof">
+            </td>
+            <td class="py-1.5 text-center font-extrabold text-stone-900">
+              ${this.model.formatSigned(totalAtk)}
+            </td>
+            <td class="py-1.5 font-bold text-stone-800 text-[11px]">
+              ${dmgString}
+            </td>
+            <td class="py-1.5 text-center no-print">
+              <button class="text-red-700 hover:text-red-900 text-xs font-bold px-1" data-weapon-delete="${index}" title="Rimuovi arma">✕</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll("input, select").forEach(input => {
+          input.addEventListener("change", (e) => {
+            const idx = e.target.getAttribute("data-weapon-idx");
+            const field = e.target.getAttribute("data-field");
+            if (idx === null || !field) return;
+
+            if (field === "prof") {
+              this.model.data.weapons[idx].prof = e.target.checked;
+            } else if (field === "name" || field === "stat") {
+              this.model.data.weapons[idx][field] = e.target.value;
+            }
+            this.updateAllCalculations();
+          });
+        });
+
+        tbody.querySelectorAll("[data-weapon-delete]").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const idx = Number(e.target.getAttribute("data-weapon-delete"));
+            this.model.data.weapons.splice(idx, 1);
+            this.renderWeapons();
+          });
+        });
+      },
+
+      updateAllCalculations() {
+        const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+
+        stats.forEach(st => {
+          const input = document.getElementById(`stat-${st}`);
+          if (input) {
+            const score = Number(input.value) || 10;
+            this.model.data.stats[st] = score;
+            const mod = this.model.getModifier(score);
+            const modDisplay = document.getElementById(`${st}-mod`);
+            if (modDisplay) {
+              modDisplay.textContent = this.model.formatSigned(mod);
+            }
+          }
+        });
+
+        const dexMod = this.getModFor('dex');
+        const initDisplay = document.getElementById("initiative-val");
+        if (initDisplay) {
+          initDisplay.textContent = this.model.formatSigned(dexMod);
+        }
+
+        const pbInput = document.getElementById("proficiencyBonus");
+        if (pbInput) {
+          this.model.data.proficiencyBonus = Number(pbInput.value) || 3;
+        }
+
+        Object.entries(this.model.data.savingThrows).forEach(([key, st]) => {
+          const valElem = document.getElementById(`save-val-${key}`);
+          if (valElem) {
+            const total = this.calcSave(st.stat, st.prof);
+            valElem.textContent = this.model.formatSigned(total);
+          }
+        });
+
+        Object.entries(this.model.data.skills).forEach(([key, sk]) => {
+          const valElem = document.getElementById(`skill-val-${key}`);
+          if (valElem) {
+            const total = this.calcSkill(sk.stat, sk.prof);
+            valElem.textContent = this.model.formatSigned(total);
+          }
+        });
+
+        const ppElem = document.getElementById("passive-perception-val");
+        if (ppElem) {
+          ppElem.textContent = this.calcPassivePerception();
+        }
+
+        // Calcolo Parametri Magici (Pagina 3)
+        const wisMod = this.getModFor('wis');
+        const pb = Number(this.model.data.proficiencyBonus);
+        const spellDc = 8 + pb + wisMod;
+        const spellAtk = this.model.formatSigned(pb + wisMod);
+
+        const spellDcElem = document.getElementById("spell-save-dc");
+        const spellAtkElem = document.getElementById("spell-atk-bonus");
+        if (spellDcElem) spellDcElem.textContent = spellDc;
+        if (spellAtkElem) spellAtkElem.textContent = spellAtk;
+
+        document.querySelectorAll(".spell-dc-val").forEach(el => el.textContent = spellDc);
+        document.querySelectorAll(".spell-atk-val").forEach(el => el.textContent = spellAtk);
+
+        this.renderWeapons();
+
+        const rageTag = document.getElementById("rage-status-tag");
+        if (rageTag) {
+          if (this.model.data.isRaging) {
+            rageTag.className = "px-1.5 py-0.5 bg-red-700 text-white rounded text-[8px] font-bold animate-pulse";
+            rageTag.textContent = "IRA ATTIVA (+2 DMG)";
+          } else {
+            rageTag.className = "px-1.5 py-0.5 bg-stone-300 text-stone-700 rounded text-[8px]";
+            rageTag.textContent = "Ira: Inattiva";
+          }
+        }
+      },
+
+      setupTabs() {
+        const tabs = [1, 2, 3];
+        tabs.forEach(num => {
+          const btn = document.getElementById(`tab-btn-${num}`);
+          if (btn) {
+            btn.addEventListener("click", () => {
+              this.activePage = num;
+              tabs.forEach(n => {
+                const targetPage = document.getElementById(`page-${n}`);
+                const targetBtn = document.getElementById(`tab-btn-${n}`);
+                if (targetPage) {
+                  if (n === num) {
+                    targetPage.classList.remove("hidden");
+                    targetPage.classList.add("block");
+                  } else {
+                    targetPage.classList.add("hidden");
+                    targetPage.classList.remove("block");
+                  }
+                }
+                if (targetBtn) {
+                  if (n === num) {
+                    targetBtn.classList.add("active");
+                    targetBtn.classList.remove("bg-[#3a3026]", "text-stone-300");
+                  } else {
+                    targetBtn.classList.remove("active");
+                    targetBtn.classList.add("bg-[#3a3026]", "text-stone-300");
+                  }
+                }
+              });
+            });
+          }
+        });
+      },
+
+      // Gestione Caricamento & Rendering Nativo GIF / Immagini nel Portrait
+      setupPortraitManager() {
+        const fileInput = document.getElementById("portrait-file-input");
+        const removeBtn = document.getElementById("btn-remove-portrait");
+
+        if (fileInput) {
+          fileInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+              console.warn("Seleziona un formato immagine valido (GIF, PNG, JPG)");
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (loadEvt) => {
+              const dataUrl = loadEvt.target.result;
+              this.applyPortrait(dataUrl);
+            };
+            // Legge il file come DataURL (preserva i frame animati della GIF)
+            reader.readAsDataURL(file);
+          });
+        }
+
+        if (removeBtn) {
+          removeBtn.addEventListener("click", () => {
+            this.clearPortrait();
+          });
+        }
+      },
+
+      applyPortrait(dataUrl) {
+        const img = document.getElementById("character-portrait");
+        const svg = document.getElementById("character-svg-portrait");
+        const removeBtn = document.getElementById("btn-remove-portrait");
+
+        if (img && dataUrl) {
+          img.src = dataUrl;
+          img.classList.remove("hidden");
+          if (svg) svg.classList.add("hidden");
+          if (removeBtn) removeBtn.classList.remove("hidden");
+          
+          this.model.data.portraitDataUrl = dataUrl;
+          
+          try {
+            localStorage.setItem("kaelen_portrait_url", dataUrl);
+          } catch(err) {
+            console.warn("Spazio localStorage saturo; l'immagine sarà salvata con il file JSON.", err);
+          }
+        }
+      },
+
+      clearPortrait() {
+        const img = document.getElementById("character-portrait");
+        const svg = document.getElementById("character-svg-portrait");
+        const removeBtn = document.getElementById("btn-remove-portrait");
+
+        if (img) {
+          img.src = "";
+          img.classList.add("hidden");
+        }
+        if (svg) svg.classList.remove("hidden");
+        if (removeBtn) removeBtn.classList.add("hidden");
+
+        this.model.data.portraitDataUrl = null;
+        localStorage.removeItem("kaelen_portrait_url");
+      },
+
+      loadStoredPortrait() {
+        try {
+          const stored = localStorage.getItem("kaelen_portrait_url");
+          if (stored) {
+            this.applyPortrait(stored);
+          }
+        } catch(e) {
+          // Ignora in ambienti sandbox
+        }
+      },
+
+      bindEvents() {
+        const stats = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+        
+        stats.forEach(st => {
+          const input = document.getElementById(`stat-${st}`);
+          if (input) {
+            input.addEventListener("input", () => this.updateAllCalculations());
+          }
+        });
+
+        const pbInput = document.getElementById("proficiencyBonus");
+        if (pbInput) {
+          pbInput.addEventListener("input", () => this.updateAllCalculations());
+        }
+
+        const rageBtn = document.getElementById("btn-rage-toggle");
+        if (rageBtn) {
+          rageBtn.addEventListener("click", () => {
+            this.model.data.isRaging = !this.model.data.isRaging;
+            rageBtn.textContent = this.model.data.isRaging 
+              ? "⚡ Disattiva Ira Zelota" 
+              : "🔥 Attiva Ira Zelota (+2 Dmg)";
+            this.updateAllCalculations();
+          });
+        }
+
+        const addWpnBtn = document.getElementById("btn-add-weapon");
+        if (addWpnBtn) {
+          addWpnBtn.addEventListener("click", () => {
+            this.model.data.weapons.push({
+              id: "w_" + Date.now(),
+              name: "Nuova Arma",
+              stat: "str",
+              prof: true,
+              dice: "1d8",
+              type: "Tagliente",
+              bonusDmg: 0
+            });
+            this.renderWeapons();
+          });
+        }
+
+        // Esportazione JSON
+        const exportBtn = document.getElementById("btn-export-json");
+        if (exportBtn) {
+          exportBtn.addEventListener("click", () => {
+            this.exportToJson();
+          });
+        }
+
+        // Importazione JSON
+        const importInput = document.getElementById("file-import-json");
+        if (importInput) {
+          importInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (evt) => {
+                try {
+                  const imported = JSON.parse(evt.target.result);
+                  this.importFromJson(imported);
+                } catch(err) {
+                  console.error("Formato JSON non valido", err);
+                }
+              };
+              reader.readAsText(file);
+            }
+          });
+        }
+
+        const resetBtn = document.getElementById("btn-reset");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            location.reload();
+          });
+        }
+      },
+
+      exportToJson() {
+        const sheetData = {
+          version: "2.0",
+          model: this.model.data,
+          fields: {}
+        };
+
+        const inputs = document.querySelectorAll("#sheet input[type='text'], #sheet input[type='number'], #sheet textarea");
+        inputs.forEach(el => {
+          if (el.id) {
+            sheetData.fields[el.id] = el.value;
+          }
+        });
+
+        const blob = new Blob([JSON.stringify(sheetData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const charName = document.getElementById("characterName")?.value || "Personaggio_DND5e";
+        a.href = url;
+        a.download = `${charName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_dnd5e.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+
+      importFromJson(importedData) {
+        if (!importedData || !importedData.model) return;
+        this.model.data = importedData.model;
+
+        if (importedData.fields) {
+          Object.entries(importedData.fields).forEach(([id, val]) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+          });
+        }
+
+        if (this.model.data.portraitDataUrl) {
+          this.applyPortrait(this.model.data.portraitDataUrl);
+        } else {
+          this.clearPortrait();
+        }
+
+        this.renderSavingThrows();
+        this.renderSkills();
+        this.renderWeapons();
+        this.updateAllCalculations();
+      }
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      CharacterViewModel.init();
+    });
+  </script>
+</body>
+</html>
