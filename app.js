@@ -1859,6 +1859,11 @@ const App = {
       btnHeaderUpdate.addEventListener("click", () => this.applyUpdate());
     }
 
+    const btnBottomNavUpdate = document.getElementById("bottom-nav-update-btn");
+    if (btnBottomNavUpdate) {
+      btnBottomNavUpdate.addEventListener("click", () => this.applyUpdate());
+    }
+
     const btnDismiss = document.getElementById("pwa-update-dismiss");
     const banner = document.getElementById("pwa-update-banner");
     if (btnDismiss && banner) {
@@ -1926,6 +1931,12 @@ const App = {
     const btnHeader = document.getElementById("btn-header-update");
     if (btnHeader) {
       btnHeader.classList.remove("hidden");
+    }
+
+    // Mostra pulsante nella barra mobile inferiore
+    const btnBottomNav = document.getElementById("bottom-nav-update-btn");
+    if (btnBottomNav) {
+      btnBottomNav.classList.remove("hidden");
     }
 
     // Mostra il banner popup centrato

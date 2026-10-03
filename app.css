@@ -376,3 +376,62 @@ textarea {
     page-break-after: always;
   }
 }
+
+/* ==========================================================================
+   BANNER AGGIORNAMENTO PWA - CENTRAGGIO DEFINITIVO PER SMARTPHONE & BOOX
+   ========================================================================== */
+html, body {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+#pwa-update-banner {
+  position: fixed !important;
+  top: 10px !important;
+  left: 10px !important;
+  right: 10px !important;
+  width: calc(100% - 20px) !important;
+  max-width: 440px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  transform: none !important;
+  -webkit-transform: none !important;
+  z-index: 999999 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background-color: #2b221a !important;
+  color: #f7f2ea !important;
+  border: 2px solid #f59e0b !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.75), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+}
+
+#pwa-update-banner.hidden {
+  display: none !important;
+}
+
+#pwa-update-btn {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  margin-top: 10px !important;
+  box-sizing: border-box !important;
+  background-color: #f59e0b !important;
+  color: #1c1917 !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #b45309 !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+}
+
+#pwa-update-btn:active {
+  background-color: #d97706 !important;
+  transform: scale(0.98) !important;
+}
