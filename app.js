@@ -177,6 +177,51 @@ const App = {
   // ---------------------------------------------------------------------------
   // NAVIGAZIONE VISTE (Scheda / Builder / Compendio / Salvati)
   // ---------------------------------------------------------------------------
+  
+  // ---------------------------------------------------------------------------
+  // EASTER EGG AUTORE: DOPPIO CLIC / TOCCO SU SIMBOLO DADO
+  // ---------------------------------------------------------------------------
+  initEasterEgg() {
+    const diceIcon = document.getElementById("title-dice-icon");
+    const diceLogo = document.getElementById("app-dice-logo");
+    const creditsBadge = document.getElementById("author-credits-badge");
+
+    if (!creditsBadge) return;
+
+    const toggleCredits = () => {
+      const isHidden = creditsBadge.classList.contains("hidden");
+      if (isHidden) {
+        creditsBadge.classList.remove("hidden");
+      } else {
+        creditsBadge.classList.add("hidden");
+      }
+    };
+
+    const attachDoubleAction = (el) => {
+      if (!el) return;
+      el.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        toggleCredits();
+      });
+
+      let lastTapTime = 0;
+      el.addEventListener("touchend", (e) => {
+        const currentTime = new Date().getTime();
+        const diff = currentTime - lastTapTime;
+        if (diff < 350 && diff > 0) {
+          e.preventDefault();
+          toggleCredits();
+          lastTapTime = 0;
+        } else {
+          lastTapTime = currentTime;
+        }
+      });
+    };
+
+    attachDoubleAction(diceIcon);
+    attachDoubleAction(diceLogo);
+  },
+
   initViews() {
     const buttons = document.querySelectorAll("[data-target-view]");
     buttons.forEach(btn => {
@@ -501,6 +546,339 @@ const App = {
           this.debouncedSave();
         }
       });
+    });
+  },
+
+  
+  // ---------------------------------------------------------------------------
+  // TRACCIATORE SLOT INCANTESIMI (D&D 5E) - LIVELLI 1-9
+  // ---------------------------------------------------------------------------
+  renderSpellSlots() {
+    const grid = document.getElementById("spell-slots-tracker-grid");
+    const casterBadge = document.getElementById("sheet-caster-badge");
+    const abilitySelect = document.getElementById("sheet-spell-ability");
+    const dcDisplay = document.getElementById("sheet-spell-save-dc");
+    const atkDisplay = document.getElementById("sheet-spell-atk-bonus");
+    const totalSlotsSummary = document.getElementById("total-slots-summary");
+
+    if (!this.model.spellSlots) this.model.spellSlots = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    if (!this.model.spellSlotsUsed) this.model.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    const classLevelStr = document.getElementById("class-level")?.value || this.model.data?.identity?.classLevel || "";
+    const match = classLevelStr.match(/([a-zA-ZàèéìòùÀÈÉÌÒÙ\s]+?)\s*(\(?.*?\)?)\s*(\d+)/);
+    const className = match ? match[1].trim() : "Barbaro";
+    const level = match ? parseInt(match[3], 10) || 1 : 1;
+
+    const isAllZero = this.model.spellSlots.every(s => s === 0);
+    const calculated = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.calculateSpellSlots) ? DND_ENGINE.calculateSpellSlots(className, level) : { isCaster: false, slots: [0,0,0,0,0,0,0,0,0] };
+
+    if (isAllZero && calculated.isCaster) {
+      this.model.spellSlots = [...calculated.slots];
+    }
+
+    if (casterBadge) {
+      if (calculated.isCaster) {
+        casterBadge.textContent = `${calculated.type.toUpperCase()} CASTER (${className} ${level})`;
+        casterBadge.className = "text-[9px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold uppercase";
+      } else {
+        casterBadge.textContent = "BARBARO (ZELOTA) - SLOT MANUALI";
+        casterBadge.className = "text-[9px] px-2 py-0.5 rounded bg-[#ede3d1] border border-[#ab9582] text-stone-700 font-bold uppercase";
+      }
+    }
+
+    if (abilitySelect) {
+      if (this.model.spellAbility && this.model.spellAbility !== "none") {
+        abilitySelect.value = this.model.spellAbility;
+      } else if (calculated.isCaster) {
+        const cLower = className.toLowerCase();
+        if (cLower.includes("mago") || cLower.includes("wizard") || cLower.includes("artefice") || cLower.includes("artificer")) {
+          abilitySelect.value = "int";
+          this.model.spellAbility = "int";
+        } else if (cLower.includes("chierico") || cLower.includes("cleric") || cLower.includes("druid") || cLower.includes("ranger")) {
+          abilitySelect.value = "wis";
+          this.model.spellAbility = "wis";
+        } else if (cLower.includes("bardo") || cLower.includes("bard") || cLower.includes("stregone") || cLower.includes("sorcerer") || cLower.includes("warlock") || cLower.includes("paladin")) {
+          abilitySelect.value = "cha";
+          this.model.spellAbility = "cha";
+        }
+      }
+
+      const curAbility = abilitySelect.value;
+      const pb = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.calcPB) ? DND_ENGINE.calcPB(level) : 2;
+
+      if (curAbility === "none" || !this.model.data?.stats?.[curAbility]) {
+        if (dcDisplay) dcDisplay.textContent = "-";
+        if (atkDisplay) atkDisplay.textContent = "-";
+      } else {
+        const mod = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.calcMod) ? DND_ENGINE.calcMod(this.model.data.stats[curAbility]) : 0;
+        const dc = 8 + pb + mod;
+        const atk = pb + mod;
+        if (dcDisplay) dcDisplay.textContent = `${dc}`;
+        if (atkDisplay) atkDisplay.textContent = atk >= 0 ? `+${atk}` : `${atk}`;
+      }
+
+      abilitySelect.onchange = () => {
+        this.model.spellAbility = abilitySelect.value;
+        this.renderSpellSlots();
+        this.saveCurrentCharacter();
+      };
+    }
+
+    if (grid) {
+      grid.innerHTML = "";
+      let totalSlotsCount = 0;
+      let totalUsedCount = 0;
+
+      for (let i = 0; i < 9; i++) {
+        const slotLvl = i + 1;
+        const maxSlots = this.model.spellSlots[i] || 0;
+        const usedSlots = this.model.spellSlotsUsed[i] || 0;
+
+        totalSlotsCount += maxSlots;
+        totalUsedCount += usedSlots;
+
+        const col = document.createElement("div");
+        col.className = `p-2 rounded border flex flex-col items-center justify-between text-center transition ${maxSlots > 0 ? 'bg-amber-50/80 border-amber-300' : 'bg-stone-100/70 border-stone-300 opacity-60'}`;
+
+        let checkboxesHtml = "";
+        if (maxSlots > 0) {
+          checkboxesHtml = `<div class="flex flex-wrap gap-1.5 justify-center my-1">`;
+          for (let s = 0; s < maxSlots; s++) {
+            const isUsed = s < usedSlots;
+            checkboxesHtml += `
+              <input type="checkbox" class="dnd-circle-check slot-checkbox cursor-pointer" data-slot-level="${slotLvl}" data-slot-index="${s}" ${isUsed ? 'checked' : ''} title="Slot ${s+1} di ${maxSlots}">
+            `;
+          }
+          checkboxesHtml += `</div>`;
+        } else {
+          checkboxesHtml = `<div class="text-[9px] text-stone-400 italic my-1.5">0 slot</div>`;
+        }
+
+        col.innerHTML = `
+          <div class="w-full border-b border-[#c2b4a3] pb-1 mb-1 flex items-center justify-between">
+            <span class="font-bold text-[10px] text-stone-800">${slotLvl}° Liv</span>
+            <div class="flex items-center gap-1">
+              <button class="btn-slot-sub text-[9px] px-1 rounded bg-stone-200 hover:bg-stone-300 font-bold" data-level="${slotLvl}">-</button>
+              <span class="font-bold text-[11px] text-stone-900">${maxSlots}</span>
+              <button class="btn-slot-add text-[9px] px-1 rounded bg-stone-200 hover:bg-stone-300 font-bold" data-level="${slotLvl}">+</button>
+            </div>
+          </div>
+          ${checkboxesHtml}
+          <div class="text-[9px] text-stone-600 mt-0.5 font-medium">
+            ${maxSlots > 0 ? `${maxSlots - usedSlots}/${maxSlots} liberi` : '-'}
+          </div>
+        `;
+
+        col.querySelectorAll(".slot-checkbox").forEach(cb => {
+          cb.addEventListener("change", () => {
+            const checkedCount = col.querySelectorAll(".slot-checkbox:checked").length;
+            this.model.spellSlotsUsed[i] = checkedCount;
+            this.renderSpellSlots();
+            this.saveCurrentCharacter();
+          });
+        });
+
+        const btnAdd = col.querySelector(".btn-slot-add");
+        const btnSub = col.querySelector(".btn-slot-sub");
+        if (btnAdd) {
+          btnAdd.addEventListener("click", () => {
+            this.model.spellSlots[i] = (this.model.spellSlots[i] || 0) + 1;
+            this.renderSpellSlots();
+            this.saveCurrentCharacter();
+          });
+        }
+        if (btnSub) {
+          btnSub.addEventListener("click", () => {
+            if ((this.model.spellSlots[i] || 0) > 0) {
+              this.model.spellSlots[i]--;
+              this.model.spellSlotsUsed[i] = Math.min(this.model.spellSlotsUsed[i], this.model.spellSlots[i]);
+              this.renderSpellSlots();
+              this.saveCurrentCharacter();
+            }
+          });
+        }
+
+        grid.appendChild(col);
+      }
+
+      if (totalSlotsSummary) {
+        totalSlotsSummary.textContent = `Totale: ${totalSlotsCount - totalUsedCount} / ${totalSlotsCount} slot liberi`;
+      }
+    }
+
+    const btnResetManual = document.getElementById("btn-reset-slots-manual");
+    if (btnResetManual) {
+      btnResetManual.onclick = () => {
+        this.model.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        this.renderSpellSlots();
+        this.saveCurrentCharacter();
+      };
+    }
+  },
+
+  // ---------------------------------------------------------------------------
+  // GRIMORIO DEL PERSONAGGIO (INCANTESIMI CON LA STELLA ★)
+  // ---------------------------------------------------------------------------
+  renderSheetSpellbook() {
+    const container = document.getElementById("sheet-spellbook-cards");
+    const badge = document.getElementById("sheet-starred-count-badge");
+    const btnOpenComp = document.getElementById("btn-open-compendium-spells");
+
+    if (!this.model.spells) this.model.spells = [];
+    const mySpells = this.model.spells;
+
+    if (badge) {
+      badge.textContent = `${mySpells.length} Incantesim${mySpells.length === 1 ? 'o' : 'i'}`;
+    }
+
+    if (btnOpenComp) {
+      btnOpenComp.onclick = () => {
+        const compTabBtn = document.querySelector('[data-target-view="view-compendium"]');
+        if (compTabBtn) compTabBtn.click();
+        const spellsFilterBtn = document.querySelector('.compendium-filter-btn[data-filter="spells"]');
+        if (spellsFilterBtn) spellsFilterBtn.click();
+        const input = document.getElementById("compendium-search-input");
+        if (input) input.focus();
+      };
+    }
+
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (mySpells.length === 0) {
+      container.innerHTML = `
+        <div class="p-6 text-center text-stone-600 bg-white/70 rounded-lg border border-dashed border-stone-300">
+          <div class="text-3xl mb-2">✨📖</div>
+          <p class="font-bold text-sm text-stone-800 mb-1">Nessun incantesimo salvato nel tuo Grimorio!</p>
+          <p class="text-xs text-stone-600 mb-3 max-w-[460px] mx-auto">
+            Sfoglia il <strong>Compendio Regole</strong> e clicca sul pulsante <strong>☆ Aggiungi</strong> accanto a qualsiasi incantesimo per aggiungerlo direttamente a questa scheda con tracciamento degli slot in tempo reale.
+          </p>
+          <button class="action-btn text-xs py-1.5 px-4 bg-amber-800 text-amber-100 font-bold rounded shadow" onclick="document.querySelector('[data-target-view=\'view-compendium\']').click()">
+            Apri Compendio Incantesimi 🔍
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    const spellsList = (typeof DND_DATA !== "undefined" && DND_DATA.spells) ? DND_DATA.spells : [];
+    const spellObjects = mySpells.map(id => {
+      const found = spellsList.find(s => s.id === id);
+      return found || { id, name: id, level: 1, school: "Magia", time: "1 Azione", range: "Contatto", desc: "Dettagli non trovati nel compendio." };
+    });
+
+    spellObjects.sort((a, b) => {
+      if (a.level !== b.level) return a.level - b.level;
+      return a.name.localeCompare(b.name);
+    });
+
+    let currentLvl = -1;
+    spellObjects.forEach(s => {
+      if (s.level !== currentLvl) {
+        currentLvl = s.level;
+        const header = document.createElement("div");
+        header.className = "font-dnd-heading text-xs font-bold text-amber-950 uppercase tracking-wider bg-[#ede3d1] px-2.5 py-1 rounded border border-[#ab9582] mt-2 mb-1 flex items-center justify-between";
+        header.innerHTML = `
+          <span>${s.level === 0 ? '✨ Trucchetti (Livello 0)' : `🔮 Incantesimi di ${s.level}° Livello`}</span>
+          <span class="text-[10px] text-stone-600 font-sans font-normal lowercase">${s.level === 0 ? 'Lancio illimitato' : `Consuma 1 slot di ${s.level}° liv.`}</span>
+        `;
+        container.appendChild(header);
+      }
+
+      const card = document.createElement("div");
+      card.className = "p-2.5 bg-white/95 rounded border border-stone-300 hover:border-amber-600/70 transition shadow-xs flex flex-col gap-1.5";
+
+      const tags = [];
+      if (s.concentration) tags.push("Conc.");
+      if (s.ritual) tags.push("Rituale");
+      if (s.source) tags.push(s.source);
+
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="font-bold text-sm text-stone-900">${s.name}</div>
+            <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-stone-600 mt-0.5">
+              <span class="font-semibold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">${s.school}</span>
+              <span>• Tempo: <strong>${s.time}</strong></span>
+              <span>• Gittata: <strong>${s.range}</strong></span>
+              <span>• Durata: <strong>${s.duration || 'Istantanea'}</strong></span>
+              ${tags.length > 0 ? `<span class="bg-stone-100 text-stone-700 px-1 rounded border border-stone-300 font-bold">${tags.join(", ")}</span>` : ''}
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button class="btn-cast-spell text-xs font-bold px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-stone-950 border border-amber-700 transition" title="Lancia incantesimo e consuma uno slot">
+              ✨ Lancia
+            </button>
+            <button class="btn-remove-spell text-xs font-bold px-2 py-1 rounded bg-stone-100 hover:bg-red-100 text-stone-600 hover:text-red-700 border border-stone-300 transition" title="Rimuovi dal Grimorio">
+              ★ Rimuovi
+            </button>
+          </div>
+        </div>
+        <div class="spell-desc text-[11px] text-stone-700 leading-relaxed whitespace-pre-line border-t border-stone-200/60 pt-1.5 hidden">${s.desc}</div>
+        <button class="btn-toggle-desc text-[10px] text-amber-800 hover:underline font-semibold self-start">
+          Mostra descrizione ▼
+        </button>
+      `;
+
+      const descEl = card.querySelector(".spell-desc");
+      const toggleDescBtn = card.querySelector(".btn-toggle-desc");
+      if (toggleDescBtn && descEl) {
+        toggleDescBtn.addEventListener("click", () => {
+          const isHidden = descEl.classList.contains("hidden");
+          if (isHidden) {
+            descEl.classList.remove("hidden");
+            toggleDescBtn.textContent = "Nascondi descrizione ▲";
+          } else {
+            descEl.classList.add("hidden");
+            toggleDescBtn.textContent = "Mostra descrizione ▼";
+          }
+        });
+      }
+
+      const btnCast = card.querySelector(".btn-cast-spell");
+      if (btnCast) {
+        btnCast.addEventListener("click", () => {
+          if (s.level === 0) {
+            alert(`✨ Hai lanciato "${s.name}"!\nI Trucchetti non consumano slot incantesimo.`);
+            return;
+          }
+
+          const lvlIdx = s.level - 1;
+          const maxSlots = this.model.spellSlots[lvlIdx] || 0;
+          const usedSlots = this.model.spellSlotsUsed[lvlIdx] || 0;
+
+          if (maxSlots === 0) {
+            alert(`⚠️ Non hai slot di ${s.level}° livello configurati per il tuo personaggio!\nPuoi aggiungerne cliccando sul '+' nel Tracciatore Slot in alto.`);
+            return;
+          }
+
+          if (usedSlots >= maxSlots) {
+            alert(`⚠️ Hai esaurito tutti gli slot di ${s.level}° livello (${usedSlots}/${maxSlots} consumati)!\nPuoi lanciare usando uno slot di livello superiore oppure eseguire un Riposo Lungo (⛺).`);
+            return;
+          }
+
+          this.model.spellSlotsUsed[lvlIdx]++;
+          this.renderSpellSlots();
+          this.saveCurrentCharacter();
+          alert(`✨ Lanciato "${s.name}"!\nConsumato 1 slot di ${s.level}° livello (${this.model.spellSlotsUsed[lvlIdx]}/${maxSlots} usati).`);
+        });
+      }
+
+      const btnRemove = card.querySelector(".btn-remove-spell");
+      if (btnRemove) {
+        btnRemove.addEventListener("click", () => {
+          const idx = this.model.spells.indexOf(s.id);
+          if (idx >= 0) {
+            this.model.spells.splice(idx, 1);
+            this.saveCurrentCharacter();
+            this.renderSheetSpellbook();
+            const input = document.getElementById("compendium-search-input");
+            this.renderCompendium(input ? input.value.trim().toLowerCase() : "", "all");
+          }
+        });
+      }
+
+      container.appendChild(card);
     });
   },
 

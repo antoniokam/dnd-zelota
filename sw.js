@@ -2,7 +2,7 @@
 // SERVICE WORKER - CACHE-FIRST PER USO 100% OFFLINE (TABLET, BOOX, SMARTPHONE)
 // =============================================================================
 
-const CACHE_NAME = 'dnd-zelota-v3.5.2';
+const CACHE_NAME = 'dnd-zelota-v3.5.3';
 
 const ASSETS_TO_CACHE = [
   './',
