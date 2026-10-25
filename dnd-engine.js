@@ -425,13 +425,24 @@ const DND_ENGINE = {
   },
 
   saveCharacter(charPayload, id = null) {
+    const charId = id || `char_${Date.now()}`;
+    const name = charPayload.fields?.characterName || charPayload.data?.identity?.characterName || "Senza Nome";
+    const charClass = charPayload.fields?.classLevel || charPayload.data?.identity?.classLevel || "Avventuriero";
+
     try {
-      const charId = id || `char_${Date.now()}`;
-      const name = charPayload.fields?.characterName || charPayload.data?.identity?.characterName || "Senza Nome";
-      const charClass = charPayload.fields?.classLevel || charPayload.data?.identity?.classLevel || "Avventuriero";
-
       localStorage.setItem(this.STORAGE_PREFIX + charId, JSON.stringify(charPayload));
+    } catch (e) {
+      console.warn("localStorage quota superata per payload completo. Salvataggio fallback leggero:", e);
+      try {
+        const lightweight = JSON.parse(JSON.stringify(charPayload));
+        if (lightweight.model?.portraitDataUrl) lightweight.model.portraitDataUrl = null;
+        localStorage.setItem(this.STORAGE_PREFIX + charId, JSON.stringify(lightweight));
+      } catch (innerErr) {
+        console.warn("Impossibile salvare payload in localStorage:", innerErr);
+      }
+    }
 
+    try {
       let list = this.getSavedCharactersList();
       const existingIdx = list.findIndex(c => c.id === charId);
       const meta = { id: charId, name, classLevel: charClass, updatedAt: new Date().toISOString() };
@@ -445,8 +456,8 @@ const DND_ENGINE = {
       localStorage.setItem(this.ACTIVE_CHAR_KEY, charId);
       return charId;
     } catch (e) {
-      console.error("Errore salvataggio scheda in localStorage", e);
-      return null;
+      console.error("Errore salvataggio metadati scheda in localStorage", e);
+      return charId;
     }
   },
 
@@ -480,6 +491,82 @@ const DND_ENGINE = {
   },
 
   // ---------------------------------------------------------------------------
+  // Parser robusto per Class e Subclass (es. "Barbaro (Zelota) 6", "Mago 5", "Guerriero Maestro d'Armi 10")
+  parseClassLevel(classLevelStr) {
+    const str = (classLevelStr || "").trim();
+    if (!str) return { className: "Barbaro", subName: "", level: 1 };
+
+    // 1. Estrai il livello numerico finale o esplicito
+    let level = 1;
+    let textPart = str;
+    const endNumberMatch = str.match(/^(.*?)(?:[\s,]+|\s*#|\s*liv\.?\s*|\s*lvl\.?\s*|\s*level\s*)(\d+)\s*$/i);
+    if (endNumberMatch) {
+      textPart = endNumberMatch[1].trim();
+      level = parseInt(endNumberMatch[2], 10) || 1;
+    } else {
+      const anyNumMatch = str.match(/\b(\d{1,2})\b/);
+      if (anyNumMatch) {
+        level = parseInt(anyNumMatch[1], 10) || 1;
+        textPart = str.replace(anyNumMatch[0], "").trim();
+      }
+    }
+
+    // 2. Se ci sono parentesi es. "Barbaro (Zelota)" o "Guerriero [Campione]"
+    const parenMatch = textPart.match(/^(.*?)\s*[\(\[]\s*(.*?)\s*[\)\]]$/);
+    if (parenMatch) {
+      return {
+        className: parenMatch[1].trim() || "Barbaro",
+        subName: parenMatch[2].trim(),
+        level: Math.max(1, Math.min(20, level))
+      };
+    }
+
+    // 3. Riconoscimento classi note D&D 5e (Italiano ed Inglese)
+    const knownClasses = [
+      "Barbaro", "Barbarian",
+      "Bardo", "Bard",
+      "Chierico", "Cleric",
+      "Druido", "Druid",
+      "Guerriero", "Fighter",
+      "Monaco", "Monk",
+      "Paladino", "Paladin",
+      "Ranger",
+      "Ladro", "Rogue",
+      "Stregone", "Sorcerer",
+      "Warlock",
+      "Mago", "Wizard",
+      "Artefice", "Artificer"
+    ];
+
+    for (const kc of knownClasses) {
+      const regex = new RegExp(`^${kc}\\b`, 'i');
+      if (regex.test(textPart)) {
+        const sub = textPart.slice(kc.length).trim().replace(/^[-–—:\s]+/, "");
+        return {
+          className: kc.charAt(0).toUpperCase() + kc.slice(1).toLowerCase(),
+          subName: sub,
+          level: Math.max(1, Math.min(20, level))
+        };
+      }
+    }
+
+    // 4. Fallback prima parola come classe, resto come sottoclasse
+    const words = textPart.split(/\s+/);
+    if (words.length > 1) {
+      return {
+        className: words[0],
+        subName: words.slice(1).join(" "),
+        level: Math.max(1, Math.min(20, level))
+      };
+    }
+
+    return {
+      className: textPart || "Barbaro",
+      subName: "",
+      level: Math.max(1, Math.min(20, level))
+    };
+  },
+
   // Calcolo Slot Incantesimi (D&D 5e) per tutte le 13 classi
   calculateSpellSlots(className, level) {
     const cls = (className || "").toLowerCase();
@@ -606,19 +693,13 @@ const DND_ENGINE = {
     const hpMode = options.hpMode || "average"; // "average" o "roll"
     const hpRoll = parseInt(options.hpRoll, 10) || 0;
 
-    // Recupera la classe primaria
+    // Recupera la classe primaria tramite parser robusto
     const identity = charData.data?.identity || {};
     const classLevelStr = identity.classLevel || "Barbaro 1";
-    const match = classLevelStr.match(/([a-zA-ZàèéìòùÀÈÉÌÒÙ\s]+?)\s*(\(?.*?\)?)\s*(\d+)/);
-    
-    let currentLevel = 1;
-    let className = "Barbaro";
-    let subName = "";
-    if (match) {
-      className = match[1].trim();
-      subName = match[2].trim();
-      currentLevel = parseInt(match[3], 10) || 1;
-    }
+    const parsed = this.parseClassLevel(classLevelStr);
+    let className = parsed.className;
+    let subName = parsed.subName;
+    let currentLevel = parsed.level;
 
     const newLevel = currentLevel + 1;
     if (newLevel > 20) return { success: false, message: "Livello massimo (20) già raggiunto!" };

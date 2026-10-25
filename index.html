@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="theme-color" content="#241f1a">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self';">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <title>D&amp;D 5e Zelota Companion &amp; Character Builder</title>
   
   <link rel="manifest" href="./manifest.webmanifest">
@@ -31,7 +34,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <strong class="text-amber-300 font-dnd-heading text-sm sm:text-base">Nuova Versione Disponibile!</strong>
-            <span class="text-[9px] font-mono font-bold bg-amber-900/90 text-amber-200 px-1.5 py-0.5 rounded border border-amber-600">v3.5</span>
+            <span class="text-[9px] font-mono font-bold bg-amber-900/90 text-amber-200 px-1.5 py-0.5 rounded border border-amber-600">v3.5.4</span>
           </div>
           <span class="text-stone-300 text-xs block mt-0.5 leading-snug">Tocca sotto per ricaricare subito l'app aggiornata.</span>
         </div>
@@ -74,9 +77,9 @@
       <!-- Pulsante Aggiornamento Rapido Header (compare se c'è un update) -->
       <button id="btn-header-update" class="hidden action-btn text-xs font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 border-2 border-amber-300 shadow-md py-1 px-2.5 flex items-center gap-1.5" title="Nuova versione pronta per l'installazione">
         <span>⚡ Aggiorna App</span>
-        <span class="bg-stone-950 text-amber-300 text-[9px] px-1 py-0.2 rounded font-mono font-bold">v3.5</span>
+        <span class="bg-stone-950 text-amber-300 text-[9px] px-1 py-0.2 rounded font-mono font-bold">v3.5.4</span>
       </button>
-      <span id="mobile-version-badge" class="action-btn text-xs font-mono font-bold bg-[#1a140f] text-amber-300 border border-amber-600/70 py-1 px-2.5 rounded shadow-sm select-none" title="Versione Applicazione">v3.5</span>
+      <span id="mobile-version-badge" class="action-btn text-xs font-mono font-bold bg-[#1a140f] text-amber-300 border border-amber-600/70 py-1 px-2.5 rounded shadow-sm select-none" title="Versione Applicazione">v3.5.4</span>
       <button id="btn-toggle-eink" class="action-btn text-xs font-bold" title="Passa alla modalità ad alto contrasto per Onyx Boox">
         ⚪ Modo BOOX E-Ink
       </button>
@@ -1218,7 +1221,7 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
   <!-- FOOTER INFORMATIVO (VERSIONE VISIBILE NON INVASIVA) -->
   <footer class="w-full max-w-[1050px] text-center text-[10px] text-stone-600 py-3 mt-4 no-print flex flex-col sm:flex-row items-center justify-between gap-1 border-t border-[#8f7d6e]/40 px-2">
     <span>D&amp;D 5e Zelota Companion • 100% Offline PWA (Manuali: PHB + Xanathar + Tasha)</span>
-    <span class="font-mono font-bold text-stone-700 bg-[#ede4d3] px-2 py-0.5 rounded border border-[#ab9582]">Versione v3.5</span>
+    <span class="font-mono font-bold text-stone-700 bg-[#ede4d3] px-2 py-0.5 rounded border border-[#ab9582]">Versione v3.5.4</span>
   </footer>
 
 </body>

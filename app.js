@@ -363,11 +363,14 @@ const App = {
       `;
       container.appendChild(row);
 
-      row.querySelector(`#save-check-${key}`).addEventListener("change", (e) => {
-        this.model.data.savingThrows[key].prof = e.target.checked;
-        this.updateAllCalculations();
-        this.debouncedSave();
-      });
+      const saveCheck = row.querySelector(`#save-check-${key}`);
+      if (saveCheck) {
+        saveCheck.addEventListener("change", (e) => {
+          this.model.data.savingThrows[key].prof = e.target.checked;
+          this.updateAllCalculations();
+          this.debouncedSave();
+        });
+      }
     });
   },
 
@@ -389,11 +392,14 @@ const App = {
       `;
       container.appendChild(row);
 
-      row.querySelector(`#skill-check-${key}`).addEventListener("change", (e) => {
-        this.model.data.skills[key].prof = e.target.checked;
-        this.updateAllCalculations();
-        this.debouncedSave();
-      });
+      const skillCheck = row.querySelector(`#skill-check-${key}`);
+      if (skillCheck) {
+        skillCheck.addEventListener("change", (e) => {
+          this.model.data.skills[key].prof = e.target.checked;
+          this.updateAllCalculations();
+          this.debouncedSave();
+        });
+      }
     });
   },
 
@@ -565,9 +571,9 @@ const App = {
     if (!this.model.spellSlotsUsed) this.model.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     const classLevelStr = document.getElementById("class-level")?.value || this.model.data?.identity?.classLevel || "";
-    const match = classLevelStr.match(/([a-zA-ZàèéìòùÀÈÉÌÒÙ\s]+?)\s*(\(?.*?\)?)\s*(\d+)/);
-    const className = match ? match[1].trim() : "Barbaro";
-    const level = match ? parseInt(match[3], 10) || 1 : 1;
+    const parsed = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.parseClassLevel) ? DND_ENGINE.parseClassLevel(classLevelStr) : { className: "Barbaro", subName: "", level: 1 };
+    const className = parsed.className;
+    const level = parsed.level;
 
     const isAllZero = this.model.spellSlots.every(s => s === 0);
     const calculated = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.calculateSpellSlots) ? DND_ENGINE.calculateSpellSlots(className, level) : { isCaster: false, slots: [0,0,0,0,0,0,0,0,0] };
@@ -796,13 +802,13 @@ const App = {
       card.innerHTML = `
         <div class="flex items-start justify-between gap-2">
           <div>
-            <div class="font-bold text-sm text-stone-900">${s.name}</div>
+            <div class="font-bold text-sm text-stone-900">${this.escapeHTML(s.name)}</div>
             <div class="flex items-center gap-1.5 flex-wrap text-[10px] text-stone-600 mt-0.5">
-              <span class="font-semibold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">${s.school}</span>
-              <span>• Tempo: <strong>${s.time}</strong></span>
-              <span>• Gittata: <strong>${s.range}</strong></span>
-              <span>• Durata: <strong>${s.duration || 'Istantanea'}</strong></span>
-              ${tags.length > 0 ? `<span class="bg-stone-100 text-stone-700 px-1 rounded border border-stone-300 font-bold">${tags.join(", ")}</span>` : ''}
+              <span class="font-semibold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">${this.escapeHTML(s.school)}</span>
+              <span>• Tempo: <strong>${this.escapeHTML(s.time)}</strong></span>
+              <span>• Gittata: <strong>${this.escapeHTML(s.range)}</strong></span>
+              <span>• Durata: <strong>${this.escapeHTML(s.duration || 'Istantanea')}</strong></span>
+              ${tags.length > 0 ? `<span class="bg-stone-100 text-stone-700 px-1 rounded border border-stone-300 font-bold">${this.escapeHTML(tags.join(", "))}</span>` : ''}
             </div>
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
@@ -814,7 +820,7 @@ const App = {
             </button>
           </div>
         </div>
-        <div class="spell-desc text-[11px] text-stone-700 leading-relaxed whitespace-pre-line border-t border-stone-200/60 pt-1.5 hidden">${s.desc}</div>
+        <div class="spell-desc text-[11px] text-stone-700 leading-relaxed whitespace-pre-line border-t border-stone-200/60 pt-1.5 hidden">${this.escapeHTML(s.desc)}</div>
         <button class="btn-toggle-desc text-[10px] text-amber-800 hover:underline font-semibold self-start">
           Mostra descrizione ▼
         </button>
@@ -1064,6 +1070,12 @@ const App = {
   },
 
   applyPortrait(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== "string") return;
+    if (!dataUrl.startsWith("data:image/") && !dataUrl.startsWith("blob:")) {
+      console.warn("Rifiutato portraitDataUrl non conforme.");
+      return;
+    }
+
     const img = document.getElementById("character-portrait");
     const svg = document.getElementById("character-svg-portrait");
     const removeBtn = document.getElementById("btn-remove-portrait");
@@ -1143,10 +1155,14 @@ const App = {
     this.model.spellSlotsUsed = payload.spellSlotsUsed || payload.model?.spellSlotsUsed || this.model.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0];
     this.model.spellAbility = payload.spellAbility || payload.model?.spellAbility || this.model.spellAbility || "none";
 
-    if (payload.fields) {
+    if (payload.fields && typeof payload.fields === "object") {
       Object.entries(payload.fields).forEach(([id, val]) => {
+        if (id === "__proto__" || id === "constructor" || id === "prototype") return;
+        if (!/^[a-zA-Z0-9_\-]+$/.test(id)) return;
         const el = document.getElementById(id);
-        if (el) el.value = val;
+        if (el && (typeof val === "string" || typeof val === "number")) {
+          el.value = String(val);
+        }
       });
     }
 
@@ -1222,10 +1238,14 @@ const App = {
           <div class="text-xs text-stone-600">${this.escapeHTML(c.classLevel || "")} &bull; Aggiornato: ${new Date(c.updatedAt).toLocaleDateString()}</div>
         </div>
         <div class="flex gap-2">
-          <button class="action-btn text-xs py-1 px-3" onclick="App.loadSaved('${c.id}')">Carica</button>
-          <button class="action-btn text-xs py-1 px-2 bg-red-950/70 border-red-800 text-red-200" onclick="App.deleteSaved('${c.id}')">🗑️</button>
+          <button class="action-btn text-xs py-1 px-3 btn-load-char">Carica</button>
+          <button class="action-btn text-xs py-1 px-2 bg-red-950/70 border-red-800 text-red-200 btn-delete-char">🗑️</button>
         </div>
       `;
+      const btnLoad = card.querySelector(".btn-load-char");
+      if (btnLoad) btnLoad.addEventListener("click", () => this.loadSaved(c.id));
+      const btnDel = card.querySelector(".btn-delete-char");
+      if (btnDel) btnDel.addEventListener("click", () => this.deleteSaved(c.id));
       container.appendChild(card);
     });
   },
@@ -1981,15 +2001,15 @@ const App = {
       card.innerHTML = `
         <div class="flex items-start justify-between mb-1.5 gap-2">
           <div>
-            <div class="font-bold text-sm text-stone-900 break-words">${it.title}</div>
+            <div class="font-bold text-sm text-stone-900 break-words">${this.escapeHTML(it.title)}</div>
             <div class="flex items-center gap-1.5 flex-wrap mt-0.5">
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">${it.type} (${it.badge})</span>
-              ${it.tags ? `<span class="text-[10px] font-semibold text-stone-500">${it.tags}</span>` : ''}
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-300">${this.escapeHTML(it.type)} (${this.escapeHTML(it.badge)})</span>
+              ${it.tags ? `<span class="text-[10px] font-semibold text-stone-500">${this.escapeHTML(it.tags)}</span>` : ''}
             </div>
           </div>
           ${starBtnHtml}
         </div>
-        <div class="text-xs text-stone-700 whitespace-pre-line leading-relaxed break-words">${it.desc}</div>
+        <div class="text-xs text-stone-700 whitespace-pre-line leading-relaxed break-words">${this.escapeHTML(it.desc)}</div>
       `;
 
       if (it.isSpell) {
@@ -2374,6 +2394,13 @@ const App = {
     }, 500);
   }
 };
+
+if (typeof window !== "undefined") {
+  window.App = App;
+}
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = App;
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   App.init();
