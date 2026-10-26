@@ -855,6 +855,122 @@ const DND_ENGINE = {
       return true;
     }
     return false;
+  },
+
+  // ---------------------------------------------------------------------------
+  // MOTORE TIRADADI D&D 5E & LICENZA PRO (GATED CON CODICE)
+  // ---------------------------------------------------------------------------
+  PRO_STORAGE_KEY: "dnd_zelota_pro_unlocked",
+  VALID_PRO_CODES: ["ZELOTA-PRO-2026", "CANONICO-PRO", "DND5E-PRO-OFFLINE", "ZELOTA5E"],
+
+  isProUnlocked() {
+    try {
+      return localStorage.getItem(this.PRO_STORAGE_KEY) === "true";
+    } catch {
+      return false;
+    }
+  },
+
+  unlockPro(code) {
+    if (!code || typeof code !== "string") return false;
+    const clean = code.trim().toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+    if (this.VALID_PRO_CODES.includes(clean)) {
+      try {
+        localStorage.setItem(this.PRO_STORAGE_KEY, "true");
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  },
+
+  lockPro() {
+    try {
+      localStorage.removeItem(this.PRO_STORAGE_KEY);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  parseDiceString(str) {
+    const m = (str || "").trim().match(/^(\d+)?d(\d+)(?:\s*([+-])\s*(\d+))?$/i);
+    if (!m) return null;
+    return {
+      count: parseInt(m[1] || "1", 10),
+      die: parseInt(m[2], 10),
+      bonus: m[4] ? (m[3] === '-' ? -parseInt(m[4], 10) : parseInt(m[4], 10)) : 0
+    };
+  },
+
+  rollD20(modifier = 0, mode = 'normal') {
+    const r1 = Math.floor(Math.random() * 20) + 1;
+    const r2 = Math.floor(Math.random() * 20) + 1;
+    let natural = r1;
+    if (mode === 'advantage') natural = Math.max(r1, r2);
+    if (mode === 'disadvantage') natural = Math.min(r1, r2);
+
+    const total = natural + modifier;
+    const isCrit = natural === 20;
+    const isFumble = natural === 1;
+
+    return {
+      natural,
+      rolls: mode === 'normal' ? [r1] : [r1, r2],
+      modifier,
+      total,
+      isCrit,
+      isFumble,
+      mode
+    };
+  },
+
+  rollDamage(diceStr, mod = 0, isCrit = false) {
+    const parsed = this.parseDiceString(diceStr);
+    if (!parsed) return { total: mod, rolls: [], isCrit, diceStr };
+
+    const count = isCrit ? parsed.count * 2 : parsed.count;
+    const rolls = [];
+    let sum = 0;
+    for (let i = 0; i < count; i++) {
+      const val = Math.floor(Math.random() * parsed.die) + 1;
+      rolls.push(val);
+      sum += val;
+    }
+    const bonus = parsed.bonus + mod;
+    const total = Math.max(1, sum + bonus);
+    return {
+      diceStr,
+      count,
+      die: parsed.die,
+      rolls,
+      sum,
+      bonus,
+      total,
+      isCrit
+    };
+  },
+
+  rollGeneral(count = 1, die = 20, bonus = 0) {
+    const rolls = [];
+    let sum = 0;
+    const c = Math.max(1, Math.min(20, parseInt(count, 10) || 1));
+    const d = Math.max(2, Math.min(100, parseInt(die, 10) || 20));
+    for (let i = 0; i < c; i++) {
+      const v = Math.floor(Math.random() * d) + 1;
+      rolls.push(v);
+      sum += v;
+    }
+    const b = parseInt(bonus, 10) || 0;
+    return {
+      count: c,
+      die: d,
+      rolls,
+      sum,
+      bonus: b,
+      total: Math.max(0, sum + b)
+    };
   }
 };
 

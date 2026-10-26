@@ -435,3 +435,52 @@ html, body {
   background-color: #d97706 !important;
   transform: scale(0.98) !important;
 }
+
+/* ==========================================================================
+   TIRADADI PRO 3D & E-INK STYLES
+   ========================================================================== */
+.dice-3d-box {
+  perspective: 600px;
+  display: inline-block;
+}
+
+.dice-3d-cube {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, #78350f, #451a03);
+  color: #fef3c7;
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  font-family: 'Cinzel', Georgia, serif;
+  font-weight: 900;
+  font-size: 1.6rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.3);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dice-rolling {
+  animation: diceRollAnim 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes diceRollAnim {
+  0% { transform: rotateX(0deg) rotateY(0deg) scale(0.85); }
+  35% { transform: rotateX(190deg) rotateY(160deg) scale(1.18); }
+  70% { transform: rotateX(340deg) rotateY(320deg) scale(0.95); }
+  100% { transform: rotateX(360deg) rotateY(360deg) scale(1); }
+}
+
+/* Disattivazione animazioni in modalità Boox E-Ink */
+.theme-eink .dice-rolling {
+  animation: none !important;
+  transform: none !important;
+}
+
+.theme-eink .dice-3d-cube {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}

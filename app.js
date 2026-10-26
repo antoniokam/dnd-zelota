@@ -7,6 +7,8 @@ const App = {
   activeView: 'view-sheet',
   activePage: 1,
   activeCharId: null,
+  diceSoundMuted: false,
+  _audioCtx: null,
 
   // Modello reattivo della Scheda Personaggio
   model: {
@@ -411,6 +413,7 @@ const App = {
     const rageBonus = this.model.data.isRaging ? 2 : 0;
     const pb = Number(this.model.data.proficiencyBonus);
 
+    const isPro = typeof DND_ENGINE !== "undefined" && DND_ENGINE.isProUnlocked && DND_ENGINE.isProUnlocked();
     this.model.data.weapons.forEach((w, index) => {
       const statMod = this.getModFor(w.stat);
       const specialAtk = w.specialAtkBonus || 0;
@@ -457,6 +460,24 @@ const App = {
             </div>
           </div>
         </div>
+
+        <!-- Bottoni Tiri Rapidi (Disponibili o con invito Sblocco Pro) -->
+        ${isPro ? `
+        <div class="flex items-center gap-1.5 mt-2 pt-1.5 border-t border-[#c7b5a1]/40 no-print">
+          <button type="button" class="btn-weapon-roll-atk text-[10px] font-bold py-1 px-2.5 rounded bg-amber-600 hover:bg-amber-500 text-stone-950 border border-amber-700 flex items-center gap-1 shadow-xs transition" data-weapon-idx="${index}">
+            🎲 Tira TxC (${this.model.formatSigned(totalAtk)})
+          </button>
+          <button type="button" class="btn-weapon-roll-dmg text-[10px] font-bold py-1 px-2.5 rounded bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 flex items-center gap-1 shadow-xs transition" data-weapon-idx="${index}">
+            💥 Tira Danno (${dmgString})
+          </button>
+        </div>
+        ` : `
+        <div class="flex items-center gap-1.5 mt-1.5 pt-1 border-t border-stone-200/60 no-print">
+          <button type="button" class="btn-unlock-pro-shortcut text-[9px] text-stone-500 hover:text-amber-800 font-semibold flex items-center gap-1">
+            <span>🔒 Attiva Tiri TxC/Danno Rapidi (Codice Pro)</span>
+          </button>
+        </div>
+        `}
 
         <!-- Pannello di Modifica Dettagliata (A scomparsa) -->
         <div id="weapon-edit-panel-${index}" class="hidden mt-2 pt-2 border-t border-[#c7b5a1]/60 text-xs">
@@ -551,6 +572,27 @@ const App = {
           this.renderWeapons();
           this.debouncedSave();
         }
+      });
+    });
+
+    // Eventi Tiri Rapidi TxC e Danno (Tiradadi Pro)
+    container.querySelectorAll(".btn-weapon-roll-atk").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.getAttribute("data-weapon-idx"));
+        this.rollWeaponAttack(idx);
+      });
+    });
+
+    container.querySelectorAll(".btn-weapon-roll-dmg").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.getAttribute("data-weapon-idx"));
+        this.rollWeaponDamage(idx);
+      });
+    });
+
+    container.querySelectorAll(".btn-unlock-pro-shortcut").forEach(btn => {
+      btn.addEventListener("click", () => {
+        this.openDiceLicenseModal();
       });
     });
   },
@@ -2175,23 +2217,91 @@ const App = {
       });
     }
 
-    // 4. TIRADADI RAPIDO (DICE ROLLER)
+    // 4. TIRADADI PRO 3D & AUDIO PROCEDURALE (CON CALCOLO TXC & DANNO)
+    this.initDiceRoller();
+  },
+
+  // ---------------------------------------------------------------------------
+  // SINTETIZZATORE AUDIO PROCEDURALE DADO (WEB AUDIO API - 0 KB OFFLINE)
+  // ---------------------------------------------------------------------------
+  playDiceSound() {
+    try {
+      if (this.diceSoundMuted) return;
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!this._audioCtx) this._audioCtx = new AudioCtx();
+      if (this._audioCtx.state === 'suspended') {
+        this._audioCtx.resume();
+      }
+      const ctx = this._audioCtx;
+      const now = ctx.currentTime;
+
+      // 3-4 rimbalzi naturali su superficie lignea
+      [0, 0.07, 0.16, 0.28].forEach((delay, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc.type = "sine";
+        const baseFreq = 180 + Math.random() * 120 - idx * 25;
+        osc.frequency.setValueAtTime(baseFreq, now + delay);
+        osc.frequency.exponentialRampToValueAtTime(45, now + delay + 0.08);
+
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(750, now + delay);
+
+        const vol = idx === 0 ? 0.32 : (0.24 - idx * 0.06);
+        gain.gain.setValueAtTime(vol, now + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.08);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.09);
+      });
+    } catch (e) {
+      // Ignora silenziosamente
+    }
+  },
+
+  // ---------------------------------------------------------------------------
+  // GESTIONE CENTRALE TIRADADI PRO
+  // ---------------------------------------------------------------------------
+  initDiceRoller() {
     const btnDice = document.getElementById("btn-quick-dice");
+    const btnHeaderDice = document.getElementById("btn-header-dice");
     const modalDice = document.getElementById("modal-diceroller");
     const btnDiceClose = document.getElementById("modal-diceroller-close");
-    const diceTotalDisplay = document.getElementById("dice-roll-total");
-    const diceFormulaDisplay = document.getElementById("dice-roll-formula");
-    const diceBreakdownDisplay = document.getElementById("dice-roll-breakdown");
     const diceModInput = document.getElementById("dice-mod-input");
     const diceClear = document.getElementById("dice-btn-clear");
+    const btnSoundToggle = document.getElementById("btn-toggle-dice-sound");
+    const btnOpenLicense = document.getElementById("btn-open-dice-license");
 
-    if (btnDice && modalDice) {
-      btnDice.addEventListener("click", () => {
-        modalDice.classList.remove("hidden");
+    // Apertura Tiradadi da Header o Scheda
+    const openRoller = () => {
+      this.updateDiceLicenseUI();
+      this.renderDiceWeaponsList();
+      if (modalDice) modalDice.classList.remove("hidden");
+    };
+
+    if (btnDice) btnDice.addEventListener("click", openRoller);
+    if (btnHeaderDice) btnHeaderDice.addEventListener("click", openRoller);
+    if (btnDiceClose && modalDice) {
+      btnDiceClose.addEventListener("click", () => modalDice.classList.add("hidden"));
+    }
+
+    // Toggle Audio
+    if (btnSoundToggle) {
+      btnSoundToggle.addEventListener("click", () => {
+        this.diceSoundMuted = !this.diceSoundMuted;
+        btnSoundToggle.textContent = this.diceSoundMuted ? "🔇 Suono OFF" : "🔊 Suono ON";
       });
+    }
 
-      if (btnDiceClose) btnDiceClose.addEventListener("click", () => modalDice.classList.add("hidden"));
-
+    // Lancio Dadi Standard
+    if (modalDice) {
       const diceBtns = modalDice.querySelectorAll(".dice-btn");
       diceBtns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -2199,43 +2309,320 @@ const App = {
           const mod = parseInt(diceModInput?.value || 0, 10);
           const advMode = document.querySelector("input[name='dice-adv']:checked")?.value || "norm";
 
-          let roll1 = Math.floor(Math.random() * sides) + 1;
-          let roll2 = Math.floor(Math.random() * sides) + 1;
-          let finalRoll = roll1;
-          let breakdown = `Tiro: [${roll1}]`;
+          this.playDiceSound();
 
-          if (sides === 20 && advMode === "adv") {
-            finalRoll = Math.max(roll1, roll2);
-            breakdown = `Vantaggio: [${roll1}, ${roll2}] ➔ Scelto: ${finalRoll}`;
-          } else if (sides === 20 && advMode === "dis") {
-            finalRoll = Math.min(roll1, roll2);
-            breakdown = `Svantaggio: [${roll1}, ${roll2}] ➔ Scelto: ${finalRoll}`;
-          }
+          if (sides === 20) {
+            const res = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.rollD20) 
+              ? DND_ENGINE.rollD20(mod, advMode === 'adv' ? 'advantage' : (advMode === 'dis' ? 'disadvantage' : 'normal'))
+              : { natural: Math.floor(Math.random() * 20) + 1, total: 10 + mod, isCrit: false, isFumble: false };
 
-          const total = finalRoll + mod;
-          if (mod !== 0) {
-            breakdown += ` + (${mod}) = ${total}`;
-          }
+            let bkd = `D20 Naturale: [${res.natural}]`;
+            if (advMode === 'adv') bkd = `Vantaggio: [${res.rolls.join(', ')}] ➔ Scelto: ${res.natural}`;
+            if (advMode === 'dis') bkd = `Svantaggio: [${res.rolls.join(', ')}] ➔ Scelto: ${res.natural}`;
+            if (mod !== 0) bkd += ` ${mod >= 0 ? '+' : '-'} ${Math.abs(mod)} = ${res.total}`;
 
-          if (diceFormulaDisplay) diceFormulaDisplay.textContent = `Tiro 1d${sides}${mod ? (mod >= 0 ? '+' + mod : mod) : ''}`;
-          if (diceTotalDisplay) {
-            diceTotalDisplay.textContent = total;
-            diceTotalDisplay.style.color = (sides === 20 && finalRoll === 20) ? "#10b981" : ((sides === 20 && finalRoll === 1) ? "#ef4444" : "#fcd34d");
+            this.displayDiceResult({
+              formula: `Tiro d20 ${mod ? (mod >= 0 ? '+' + mod : mod) : ''}`,
+              natural: res.natural,
+              total: res.total,
+              breakdown: bkd,
+              isCrit: res.isCrit,
+              isFumble: res.isFumble
+            });
+          } else {
+            const res = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.rollGeneral)
+              ? DND_ENGINE.rollGeneral(1, sides, mod)
+              : { rolls: [Math.floor(Math.random() * sides) + 1], total: 1 + mod };
+
+            let bkd = `Dado 1d${sides}: [${res.rolls[0]}]`;
+            if (mod !== 0) bkd += ` ${mod >= 0 ? '+' : '-'} ${Math.abs(mod)} = ${res.total}`;
+
+            this.displayDiceResult({
+              formula: `Tiro 1d${sides} ${mod ? (mod >= 0 ? '+' + mod : mod) : ''}`,
+              natural: res.rolls[0],
+              total: res.total,
+              breakdown: bkd,
+              isCrit: false,
+              isFumble: false
+            });
           }
-          if (diceBreakdownDisplay) diceBreakdownDisplay.textContent = breakdown;
         });
       });
 
       if (diceClear) {
         diceClear.addEventListener("click", () => {
-          if (diceFormulaDisplay) diceFormulaDisplay.textContent = "Tira un dado";
-          if (diceTotalDisplay) {
-            diceTotalDisplay.textContent = "--";
-            diceTotalDisplay.style.color = "#fcd34d";
-          }
-          if (diceBreakdownDisplay) diceBreakdownDisplay.textContent = "Seleziona d20 o altri dadi sotto";
+          this.displayDiceResult({
+            formula: "Tira un dado o un'arma sotto",
+            natural: 20,
+            total: "--",
+            breakdown: "Seleziona un'arma della scheda o un dado sotto",
+            isCrit: false,
+            isFumble: false
+          });
         });
       }
+    }
+
+    // Gestione Modale Licenza
+    if (btnOpenLicense) {
+      btnOpenLicense.addEventListener("click", () => {
+        this.openDiceLicenseModal();
+      });
+    }
+
+    this.initDiceLicenseModal();
+  },
+
+  // ---------------------------------------------------------------------------
+  // DISPLAY RISULTATO DADO CON ANIMAZIONE 3D (E-INK SAFE)
+  // ---------------------------------------------------------------------------
+  displayDiceResult(data) {
+    const diceTotal = document.getElementById("dice-roll-total");
+    const diceFormula = document.getElementById("dice-roll-formula");
+    const diceBreakdown = document.getElementById("dice-roll-breakdown");
+    const diceVisual = document.getElementById("dice-3d-visual");
+    const diceNum = document.getElementById("dice-visual-num");
+    const critBadge = document.getElementById("dice-crit-badge");
+
+    if (diceFormula) diceFormula.textContent = data.formula;
+    if (diceTotal) diceTotal.textContent = data.total;
+    if (diceNum) diceNum.textContent = data.natural !== undefined ? data.natural : data.total;
+    if (diceBreakdown) diceBreakdown.textContent = data.breakdown;
+
+    // Colori e badge critico
+    if (critBadge) {
+      if (data.isCrit) {
+        critBadge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mt-1 inline-block bg-amber-400 text-stone-950 border border-amber-600 shadow-xs";
+        critBadge.textContent = "🌟 SUCCESSO CRITICO!";
+        critBadge.classList.remove("hidden");
+        if (diceTotal) diceTotal.style.color = "#fbbf24";
+      } else if (data.isFumble) {
+        critBadge.className = "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mt-1 inline-block bg-red-600 text-white border border-red-800 shadow-xs";
+        critBadge.textContent = "💀 FALLIMENTO CRITICO (1)";
+        critBadge.classList.remove("hidden");
+        if (diceTotal) diceTotal.style.color = "#f87171";
+      } else {
+        critBadge.classList.add("hidden");
+        if (diceTotal) diceTotal.style.color = "#fef08a";
+      }
+    }
+
+    // Animazione 3D (disabilitata automaticamente su Onyx Boox E-Ink)
+    if (diceVisual) {
+      const isEink = document.body.classList.contains("theme-eink");
+      if (!isEink) {
+        diceVisual.classList.remove("dice-rolling");
+        void diceVisual.offsetWidth; // Trigger reflow
+        diceVisual.classList.add("dice-rolling");
+      }
+    }
+  },
+
+  // ---------------------------------------------------------------------------
+  // TIRI AUTOMATICI ARMI SCHEDA (TXC & DANNO)
+  // ---------------------------------------------------------------------------
+  rollWeaponAttack(weaponIndex) {
+    const w = this.model.data.weapons?.[weaponIndex];
+    if (!w) return;
+
+    const modalDice = document.getElementById("modal-diceroller");
+    if (modalDice) modalDice.classList.remove("hidden");
+
+    this.playDiceSound();
+
+    const statMod = this.getModFor(w.stat);
+    const pb = Number(this.model.data.proficiencyBonus) || 0;
+    const specialAtk = w.specialAtkBonus || 0;
+    const totalMod = statMod + (w.prof ? pb : 0) + specialAtk;
+    const advMode = document.querySelector("input[name='dice-adv']:checked")?.value || "norm";
+
+    const res = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.rollD20)
+      ? DND_ENGINE.rollD20(totalMod, advMode === 'adv' ? 'advantage' : (advMode === 'dis' ? 'disadvantage' : 'normal'))
+      : { natural: Math.floor(Math.random() * 20) + 1, total: 10 + totalMod, isCrit: false, isFumble: false };
+
+    let bkd = `Tiro per Colpire: [D20: ${res.natural}] + ${statMod} (${w.stat.toUpperCase()})`;
+    if (w.prof) bkd += ` + ${pb} (PB)`;
+    if (specialAtk) bkd += ` + ${specialAtk} (Bonus)`;
+    bkd += ` = ${res.total}`;
+
+    this.displayDiceResult({
+      formula: `⚔️ Attacco: ${w.name} (TxC ${this.model.formatSigned(totalMod)})`,
+      natural: res.natural,
+      total: res.total,
+      breakdown: bkd,
+      isCrit: res.isCrit,
+      isFumble: res.isFumble
+    });
+  },
+
+  rollWeaponDamage(weaponIndex, forceCrit = false) {
+    const w = this.model.data.weapons?.[weaponIndex];
+    if (!w) return;
+
+    const modalDice = document.getElementById("modal-diceroller");
+    if (modalDice) modalDice.classList.remove("hidden");
+
+    this.playDiceSound();
+
+    const statMod = this.getModFor(w.stat);
+    const rageBonus = this.model.data.isRaging ? 2 : 0;
+    const bonusDmg = w.bonusDmg || 0;
+    const totalMod = statMod + rageBonus + bonusDmg;
+
+    const res = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.rollDamage)
+      ? DND_ENGINE.rollDamage(w.dice || "1d8", totalMod, forceCrit)
+      : { rolls: [4], total: 4 + totalMod, isCrit: forceCrit };
+
+    let bkd = `Danno: [${res.rolls.join(' + ')}] + ${statMod} (${w.stat.toUpperCase()})`;
+    if (rageBonus) bkd += ` + 2 (Ira)`;
+    if (bonusDmg) bkd += ` + ${bonusDmg} (Bonus)`;
+    bkd += ` = ${res.total} ${w.type || 'Danni'}`;
+
+    this.displayDiceResult({
+      formula: `💥 Danno: ${w.name} (${res.diceStr} ${this.model.formatSigned(totalMod)})${forceCrit ? ' [CRITICO RADDOPPIATO]' : ''}`,
+      natural: res.rolls[0],
+      total: res.total,
+      breakdown: bkd,
+      isCrit: forceCrit,
+      isFumble: false
+    });
+  },
+
+  // ---------------------------------------------------------------------------
+  // LISTA RAPIDA ARMI NEL MODALE TIRADADI
+  // ---------------------------------------------------------------------------
+  renderDiceWeaponsList() {
+    const listEl = document.getElementById("dice-weapons-quick-list");
+    if (!listEl) return;
+    listEl.innerHTML = "";
+
+    const weapons = this.model.data.weapons || [];
+    if (weapons.length === 0) {
+      listEl.innerHTML = '<div class="text-[10px] text-stone-500 italic p-1">Nessuna arma configurata sulla scheda.</div>';
+      return;
+    }
+
+    const pb = Number(this.model.data.proficiencyBonus) || 0;
+    const rageBonus = this.model.data.isRaging ? 2 : 0;
+
+    weapons.forEach((w, idx) => {
+      const statMod = this.getModFor(w.stat);
+      const totalAtk = statMod + (w.prof ? pb : 0) + (w.specialAtkBonus || 0);
+      const totalDmgMod = statMod + rageBonus + (w.bonusDmg || 0);
+      const dmgStr = `${w.dice} ${this.model.formatSigned(totalDmgMod)}`;
+
+      const row = document.createElement("div");
+      row.className = "flex items-center justify-between p-1.5 rounded bg-white/90 border border-stone-300 text-xs";
+      row.innerHTML = `
+        <div class="truncate pr-2 font-bold text-stone-900">${this.escapeHTML(w.name)}</div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button type="button" class="btn-quick-weapon-atk text-[10px] font-bold py-0.5 px-2 rounded bg-amber-600 hover:bg-amber-500 text-stone-950 border border-amber-700 shadow-xs" data-idx="${idx}">
+            🎲 TxC (${this.model.formatSigned(totalAtk)})
+          </button>
+          <button type="button" class="btn-quick-weapon-dmg text-[10px] font-bold py-0.5 px-2 rounded bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-400 shadow-xs" data-idx="${idx}">
+            💥 Danno (${dmgStr})
+          </button>
+        </div>
+      `;
+
+      row.querySelector(".btn-quick-weapon-atk").addEventListener("click", () => this.rollWeaponAttack(idx));
+      row.querySelector(".btn-quick-weapon-dmg").addEventListener("click", () => this.rollWeaponDamage(idx));
+      listEl.appendChild(row);
+    });
+  },
+
+  // ---------------------------------------------------------------------------
+  // GESTIONE LICENZA & CODICE DI SBLOCCO PRO (DISINSERIBILE)
+  // ---------------------------------------------------------------------------
+  initDiceLicenseModal() {
+    const modal = document.getElementById("modal-dice-license");
+    const btnClose = document.getElementById("modal-dice-license-close");
+    const btnActivate = document.getElementById("btn-activate-pro-code");
+    const btnDisable = document.getElementById("btn-disable-pro-code");
+    const codeInput = document.getElementById("dice-license-code-input");
+    const feedback = document.getElementById("license-feedback-msg");
+
+    if (btnClose && modal) {
+      btnClose.addEventListener("click", () => modal.classList.add("hidden"));
+    }
+
+    if (btnActivate && codeInput) {
+      btnActivate.addEventListener("click", () => {
+        const val = codeInput.value;
+        const success = (typeof DND_ENGINE !== "undefined" && DND_ENGINE.unlockPro) ? DND_ENGINE.unlockPro(val) : false;
+        if (feedback) {
+          feedback.classList.remove("hidden");
+          if (success) {
+            feedback.className = "p-2 rounded text-center font-bold text-xs bg-emerald-100 text-emerald-900 border border-emerald-400";
+            feedback.textContent = "🎉 Tiradadi Pro Sbloccato con Successo! Tiri armi e calcoli attivi.";
+            codeInput.value = "";
+            this.updateDiceLicenseUI();
+            this.renderWeapons();
+            setTimeout(() => {
+              if (modal) modal.classList.add("hidden");
+              feedback.classList.add("hidden");
+            }, 1200);
+          } else {
+            feedback.className = "p-2 rounded text-center font-bold text-xs bg-red-100 text-red-900 border border-red-400";
+            feedback.textContent = "❌ Codice non valido. Riprova con un codice promozionale valido.";
+          }
+        }
+      });
+    }
+
+    if (btnDisable) {
+      btnDisable.addEventListener("click", () => {
+        if (confirm("Vuoi disattivare il Tiradadi Pro e ritornare alla modalità base?")) {
+          if (typeof DND_ENGINE !== "undefined" && DND_ENGINE.lockPro) {
+            DND_ENGINE.lockPro();
+          }
+          this.updateDiceLicenseUI();
+          this.renderWeapons();
+          if (feedback) {
+            feedback.className = "p-2 rounded text-center font-bold text-xs bg-stone-200 text-stone-800 border border-stone-400";
+            feedback.textContent = "🔒 Tiradadi Pro disattivato. Modalità base ripristinata.";
+            feedback.classList.remove("hidden");
+            setTimeout(() => {
+              if (modal) modal.classList.add("hidden");
+              feedback.classList.add("hidden");
+            }, 1000);
+          }
+        }
+      });
+    }
+  },
+
+  openDiceLicenseModal() {
+    this.updateDiceLicenseUI();
+    const modal = document.getElementById("modal-dice-license");
+    if (modal) modal.classList.remove("hidden");
+  },
+
+  updateDiceLicenseUI() {
+    const isPro = typeof DND_ENGINE !== "undefined" && DND_ENGINE.isProUnlocked && DND_ENGINE.isProUnlocked();
+    const statusText = document.getElementById("license-status-text");
+    const statusIcon = document.getElementById("license-status-icon");
+    const statusBox = document.getElementById("license-current-status-box");
+    const inputSec = document.getElementById("license-input-section");
+    const disableSec = document.getElementById("license-disable-section");
+    const proBadge = document.getElementById("dice-pro-status-badge");
+
+    if (statusText) statusText.textContent = isPro ? "ATTIVO (Licenza Sbloccata)" : "Bloccato (Modalità Base)";
+    if (statusIcon) statusIcon.textContent = isPro ? "⚡" : "🔒";
+    if (statusBox) {
+      statusBox.className = isPro 
+        ? "p-3 rounded border flex items-center justify-between bg-amber-50 border-amber-400 text-amber-950"
+        : "p-3 rounded border flex items-center justify-between bg-stone-100 border-stone-300";
+    }
+
+    if (inputSec) inputSec.classList.toggle("hidden", isPro);
+    if (disableSec) disableSec.classList.toggle("hidden", !isPro);
+
+    if (proBadge) {
+      proBadge.textContent = isPro ? "PRO ATTIVO" : "BASE (Sblocca)";
+      proBadge.className = isPro
+        ? "text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-900 text-emerald-200 border border-emerald-600 font-mono"
+        : "text-[9px] font-bold px-1.5 py-0.5 rounded bg-stone-800 text-stone-300 border border-stone-600 font-mono";
     }
   },
 
