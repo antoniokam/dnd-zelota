@@ -439,48 +439,101 @@ html, body {
 /* ==========================================================================
    TIRADADI PRO 3D & E-INK STYLES
    ========================================================================== */
-.dice-3d-box {
-  perspective: 600px;
-  display: inline-block;
-}
-
-.dice-3d-cube {
+.d20-stage {
+  perspective: 900px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 58px;
-  height: 58px;
-  background: linear-gradient(135deg, #78350f, #451a03);
-  color: #fef3c7;
-  border: 2px solid #f59e0b;
-  border-radius: 12px;
-  font-family: 'Cinzel', Georgia, serif;
+}
+
+.d20-isometric-die {
+  width: 74px;
+  height: 74px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.15, 0.9, 0.25, 1.05);
+}
+
+.d20-poly-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+}
+
+.d20-number-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', 'Palatino Linotype', Georgia, serif;
   font-weight: 900;
-  font-size: 1.6rem;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.3);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 1.75rem;
+  color: #fffbeb;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(245,158,11,0.5);
+  pointer-events: none;
+  user-select: none;
 }
 
-.dice-rolling {
-  animation: diceRollAnim 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+/* Animazione di rotazione ad alta frequenza con frenata d'inerzia */
+.d20-tumbling {
+  animation: d20TumbleAnim 0.7s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
 }
 
-@keyframes diceRollAnim {
-  0% { transform: rotateX(0deg) rotateY(0deg) scale(0.85); }
-  35% { transform: rotateX(190deg) rotateY(160deg) scale(1.18); }
-  70% { transform: rotateX(340deg) rotateY(320deg) scale(0.95); }
-  100% { transform: rotateX(360deg) rotateY(360deg) scale(1); }
+@keyframes d20TumbleAnim {
+  0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.85); }
+  25% { transform: rotateX(390deg) rotateY(210deg) rotateZ(135deg) scale(1.18); }
+  55% { transform: rotateX(750deg) rotateY(540deg) rotateZ(300deg) scale(0.95); }
+  85% { transform: rotateX(1065deg) rotateY(710deg) rotateZ(355deg) scale(1.05); }
+  100% { transform: rotateX(1080deg) rotateY(720deg) rotateZ(360deg) scale(1); }
 }
 
 /* Disattivazione animazioni in modalità Boox E-Ink */
-.theme-eink .dice-rolling {
+.theme-eink .d20-tumbling {
   animation: none !important;
   transform: none !important;
 }
 
-.theme-eink .dice-3d-cube {
-  background: #ffffff !important;
+.theme-eink .d20-poly-svg polygon {
+  fill: #ffffff !important;
+  stroke: #000000 !important;
+  stroke-width: 2px !important;
+}
+
+.theme-eink .d20-number-overlay {
   color: #000000 !important;
-  border: 2px solid #000000 !important;
-  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Stili Segmented Buttons per Vantaggio / Svantaggio */
+.adv-btn {
+  background: transparent;
+  color: #d6d3d1;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.adv-btn.active-norm {
+  background: #78350f !important;
+  color: #fef3c7 !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.adv-btn.active-adv {
+  background: #065f46 !important;
+  color: #d1fae5 !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.adv-btn.active-dis {
+  background: #991b1b !important;
+  color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }

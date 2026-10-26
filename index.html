@@ -34,7 +34,7 @@
         <div>
           <div class="flex items-center gap-2 flex-wrap">
             <strong class="text-amber-300 font-dnd-heading text-sm sm:text-base">Nuova Versione Disponibile!</strong>
-            <span class="text-[9px] font-mono font-bold bg-amber-900/90 text-amber-200 px-1.5 py-0.5 rounded border border-amber-600">v3.5.5</span>
+            <span class="text-[9px] font-mono font-bold bg-amber-900/90 text-amber-200 px-1.5 py-0.5 rounded border border-amber-600">v3.5.6</span>
           </div>
           <span class="text-stone-300 text-xs block mt-0.5 leading-snug">Tocca sotto per ricaricare subito l'app aggiornata.</span>
         </div>
@@ -77,9 +77,9 @@
       <!-- Pulsante Aggiornamento Rapido Header (compare se c'è un update) -->
       <button id="btn-header-update" class="hidden action-btn text-xs font-bold bg-amber-500 hover:bg-amber-400 text-stone-950 border-2 border-amber-300 shadow-md py-1 px-2.5 flex items-center gap-1.5" title="Nuova versione pronta per l'installazione">
         <span>⚡ Aggiorna App</span>
-        <span class="bg-stone-950 text-amber-300 text-[9px] px-1 py-0.2 rounded font-mono font-bold">v3.5.5</span>
+        <span class="bg-stone-950 text-amber-300 text-[9px] px-1 py-0.2 rounded font-mono font-bold">v3.5.6</span>
       </button>
-      <span id="mobile-version-badge" class="action-btn text-xs font-mono font-bold bg-[#1a140f] text-amber-300 border border-amber-600/70 py-1 px-2.5 rounded shadow-sm select-none" title="Versione Applicazione">v3.5.5</span>
+      <span id="mobile-version-badge" class="action-btn text-xs font-mono font-bold bg-[#1a140f] text-amber-300 border border-amber-600/70 py-1 px-2.5 rounded shadow-sm select-none" title="Versione Applicazione">v3.5.6</span>
       <button id="btn-toggle-eink" class="action-btn text-xs font-bold" title="Passa alla modalità ad alto contrasto per Onyx Boox">
         ⚪ Modo BOOX E-Ink
       </button>
@@ -1168,15 +1168,24 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
         <div id="dice-roll-formula" class="text-[11px] text-stone-400 uppercase tracking-wider mb-1 font-semibold">Tira un dado o un'arma sotto</div>
         
         <!-- Contenitore Dado 3D Animato & Totale -->
-        <div class="flex items-center justify-center gap-3 my-1">
-          <div class="dice-3d-box">
-            <div id="dice-3d-visual" class="dice-3d-cube">
-              <span id="dice-visual-num">20</span>
+        <div class="flex items-center justify-center gap-4 my-2">
+          <div class="d20-stage">
+            <div id="dice-3d-visual" class="d20-isometric-die">
+              <svg class="d20-poly-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Facce D20 Icosaedrico Isometrico -->
+                <polygon points="50,5 93,28 78,78" fill="#78350f" stroke="#d97706" stroke-width="1.5" />
+                <polygon points="50,5 7,28 22,78" fill="#92400e" stroke="#d97706" stroke-width="1.5" />
+                <polygon points="50,5 78,78 22,78" fill="#b45309" stroke="#f59e0b" stroke-width="2" />
+                <polygon points="50,95 78,78 22,78" fill="#451a03" stroke="#d97706" stroke-width="1.5" />
+                <polygon points="7,28 22,78 50,95" fill="#78350f" stroke="#b45309" stroke-width="1.5" opacity="0.9" />
+                <polygon points="93,28 78,78 50,95" fill="#581c87" stroke="#b45309" stroke-width="1.5" opacity="0.8" />
+              </svg>
+              <div id="dice-visual-num" class="d20-number-overlay">20</div>
             </div>
           </div>
           <div class="text-left">
             <div id="dice-roll-total" class="text-4xl sm:text-5xl font-dnd-title font-black text-amber-300 leading-none">--</div>
-            <div id="dice-crit-badge" class="hidden text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded mt-1 inline-block"></div>
+            <div id="dice-crit-badge" class="hidden text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mt-1 inline-block"></div>
           </div>
         </div>
 
@@ -1186,13 +1195,27 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
         </div>
       </div>
 
-      <!-- Sezione Rapida Armi Equipaggiate (Calcolo Automatico TxC e Danno) -->
+      <!-- Sezione Rapida Armi Equipaggiate (Calcolo Automatico TxC e Danno - Gated PRO) -->
       <div id="dice-weapons-quick-container" class="mb-3 p-2.5 rounded-lg bg-[#f5ecdc] border border-[#ab9582]">
         <div class="flex items-center justify-between mb-1.5">
           <span class="text-[11px] font-bold text-stone-900 uppercase tracking-wide">⚔️ Tiri Rapidi Armi Scheda</span>
-          <span class="text-[9px] text-stone-600 font-semibold">(TxC &amp; Danno automatici)</span>
+          <span id="dice-weapons-pro-tag" class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-900 text-amber-200">PRO</span>
         </div>
-        <div id="dice-weapons-quick-list" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+        
+        <!-- Vista Bloccata (Modalità Base) -->
+        <div id="dice-weapons-locked-box" class="p-3 rounded bg-[#ede4d3] border border-amber-800/40 text-center">
+          <div class="text-xl mb-1">🔒</div>
+          <strong class="text-xs text-stone-900 block font-bold">Funzione Riservata alla Licenza Pro</strong>
+          <p class="text-[10px] text-stone-600 mt-0.5 leading-snug">
+            Il calcolo automatico dei modificatori di attacco (TxC), danno combinato (caratteristica + PB + Ira) e raddoppio critici per tutte le armi è riservato alla versione Pro.
+          </p>
+          <button type="button" id="btn-unlock-from-locked-box" class="action-btn text-xs font-bold py-1 px-3 mt-2 bg-amber-800 hover:bg-amber-700 text-amber-100 shadow-xs">
+            🔑 Inserisci Codice di Sblocco
+          </button>
+        </div>
+
+        <!-- Vista Sbloccata (Modalità Pro) -->
+        <div id="dice-weapons-unlocked-list" class="hidden space-y-1.5 max-h-36 overflow-y-auto pr-1">
           <!-- Popolato dinamicamente da App.renderDiceWeaponsList() -->
         </div>
       </div>
@@ -1211,22 +1234,22 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
         </div>
       </div>
 
-      <!-- Opzioni Vantaggio / Svantaggio & Modificatore Manuale -->
-      <div class="flex items-center justify-between gap-2 p-2 rounded bg-[#ede4d3] border border-[#ab9582] text-xs mb-3">
-        <div class="flex items-center gap-2">
-          <label class="flex items-center gap-1 cursor-pointer font-bold text-stone-800">
-            <input type="radio" name="dice-adv" value="norm" checked class="dnd-circle-check"> Normale
-          </label>
-          <label class="flex items-center gap-1 cursor-pointer font-bold text-emerald-800">
-            <input type="radio" name="dice-adv" value="adv" class="dnd-circle-check"> Vant.
-          </label>
-          <label class="flex items-center gap-1 cursor-pointer font-bold text-red-800">
-            <input type="radio" name="dice-adv" value="dis" class="dnd-circle-check"> Svant.
-          </label>
+      <!-- Opzioni Vantaggio / Svantaggio con Pulsanti a Segmento Grandi & Modificatore Manuale -->
+      <div class="p-2 rounded bg-[#ede4d3] border border-[#ab9582] text-xs mb-3">
+        <div class="text-[10px] uppercase font-bold text-stone-600 mb-1 flex items-center justify-between">
+          <span>Modalità Tiro D20</span>
+          <span id="adv-mode-label" class="font-bold text-amber-900">Normale</span>
         </div>
-        <div class="flex items-center gap-1">
-          <span class="font-bold text-stone-700">Mod:</span>
-          <input type="number" id="dice-mod-input" value="0" class="w-12 p-1 border border-[#8c7663] rounded bg-white text-center font-bold">
+        <div class="flex items-center gap-1.5">
+          <div class="flex-1 flex items-center bg-[#241a14] p-1 rounded-lg border border-amber-900/60" id="adv-mode-selector">
+            <button type="button" class="adv-btn flex-1 py-1.5 px-2 rounded text-xs font-bold text-stone-300 transition active-norm" data-mode="normal">Normale</button>
+            <button type="button" class="adv-btn flex-1 py-1.5 px-2 rounded text-xs font-bold text-stone-300 transition" data-mode="advantage">Vantaggio</button>
+            <button type="button" class="adv-btn flex-1 py-1.5 px-2 rounded text-xs font-bold text-stone-300 transition" data-mode="disadvantage">Svantaggio</button>
+          </div>
+          <div class="flex items-center gap-1 shrink-0 bg-white/80 border border-[#8c7663] rounded px-2 py-1">
+            <span class="font-bold text-stone-700 text-xs">Mod:</span>
+            <input type="number" id="dice-mod-input" value="0" class="w-10 bg-transparent text-center font-bold text-xs text-stone-900">
+          </div>
         </div>
       </div>
 
@@ -1329,7 +1352,7 @@ Morente e squarciato da lame avvelenate sulla soglia del santuario sconsacrato, 
   <!-- FOOTER INFORMATIVO (VERSIONE VISIBILE NON INVASIVA) -->
   <footer class="w-full max-w-[1050px] text-center text-[10px] text-stone-600 py-3 mt-4 no-print flex flex-col sm:flex-row items-center justify-between gap-1 border-t border-[#8f7d6e]/40 px-2">
     <span>D&amp;D 5e Zelota Companion • 100% Offline PWA (Manuali: PHB + Xanathar + Tasha)</span>
-    <span class="font-mono font-bold text-stone-700 bg-[#ede4d3] px-2 py-0.5 rounded border border-[#ab9582]">Versione v3.5.5</span>
+    <span class="font-mono font-bold text-stone-700 bg-[#ede4d3] px-2 py-0.5 rounded border border-[#ab9582]">Versione v3.5.6</span>
   </footer>
 
 </body>
